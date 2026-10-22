@@ -2695,7 +2695,16 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
   <!-- ===================== TOWER HEADS ===================== -->
   <section class="view" id="view-towers">
-    <div class="sec-h"><h2>Tower heads</h2><div class="rule"></div><span class="hint">Ownership across the five delivery towers</span></div>
+    <div class="sec-h">
+      <h2>Tower heads</h2>
+      <div class="rule"></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="hint">Ownership across the five delivery towers</span>
+        <div id="tow-hdr-btns">
+          <button class="btn" id="btn-edit-towers" style="font-size:11px;padding:3px 12px;">Edit</button>
+        </div>
+      </div>
+    </div>
     <p class="lead" id="tow-lead">Delivery is organised into <b>5 towers</b> with <b>9 named owners</b>. Each card below shows the business scope taken from the tower structure, the head or heads accountable for it, and the applications, testers, vendors and monthly change volume that sit underneath, drawn from the Q3 workbook.</p>
     <div class="towers" id="tow-cards">
   <div class="tcard">
@@ -2794,55 +2803,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </div>
   </div></div>
 
-    <div class="sec-h">
-      <h2>Ownership matrix</h2>
-      <div class="rule"></div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button class="btn" id="btn-add-owner" style="background:var(--maroon);color:#fff">+ Add</button>
-        <button class="btn" id="btn-edit-owner">Edit</button>
-        <button class="btn" id="btn-del-owner" style="color:#A3252A;border-color:#E8C5C8;">Delete</button>
-      </div>
-    </div>
-
-    <!-- Add Owner Form -->
-    <div id="owner-add-form" style="display:none;background:#FDF6F8;border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <h4 style="margin:0;font-size:13px;color:var(--maroon);font-weight:700;">Add New Tower Owner</h4>
-        <button class="btn" id="btn-cancel-add-owner-x" style="padding:2px 7px;font-size:12px;">&times;</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-        <div>
-          <label class="fld"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600">Tower *</span>
-            <select id="add-owner-tower">
-              <option value="Tower 1">Tower 1</option>
-              <option value="Tower 2">Tower 2</option>
-              <option value="Tower 3">Tower 3</option>
-              <option value="Tower 4">Tower 4</option>
-              <option value="Tower 5">Tower 5</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <label class="fld"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600">Head Name *</span>
-            <input id="add-owner-name" type="text" placeholder="Full name of owner">
-          </label>
-        </div>
-        <div>
-          <label class="fld"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600">Area Owned</span>
-            <input id="add-owner-area" type="text" placeholder="e.g. Liabilities or Tower-wide">
-          </label>
-        </div>
-        <div>
-          <label class="fld"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600">Business Scope</span>
-            <input id="add-owner-scope" type="text" placeholder="e.g. Liabilities, Wealth & CRM">
-          </label>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
-        <button class="btn" id="btn-cancel-add-owner">Cancel</button>
-        <button class="btn" id="btn-save-add-owner" style="background:var(--maroon);color:#fff">Save Owner</button>
-      </div>
-    </div>
+    <div class="sec-h"><h2>Ownership matrix</h2><div class="rule"></div></div>
     <div class="tablewrap" style="max-height:none;margin-bottom:22px">
       <table class="data" id="t-tow">
         <thead><tr>
@@ -3171,11 +3132,11 @@ let TOWERS = [
   heads:[{n:'Imtiyaz Vahora',a:'Assets',segs:['Assets','CFD']},
          {n:'Sameer Arora',a:'Credit Cards',segs:['Credit Card']}], version: 0},
  {id: 3, t:'Tower 3', tower_name:'Tower 3', scope:'Rural Banking Group (Pragati)', vert:'Rural Banking Group', vertical:'Rural Banking Group',
-  heads:[{n:'Rashmi Singh',a:'Tower-wide ownership',segs:null}], version: 0},
+  heads:[{n:'Rashmi Singh',a:'',segs:null}], version: 0},
  {id: 4, t:'Tower 4', tower_name:'Tower 4', scope:'Payments, Cards, Govt Business & TBG', vert:'Payments, Cards, Govt Business & TBG', vertical:'Payments, Cards, Govt Business & TBG',
-  heads:[{n:'Dev Ratan Suri',a:'Tower-wide ownership',segs:null}], version: 0},
+  heads:[{n:'Dev Ratan Suri',a:'',segs:null}], version: 0},
  {id: 5, t:'Tower 5', tower_name:'Tower 5', scope:'WBG Lending, Trade and Treasury', vert:'WBG Lending, Trade and Treasury', vertical:'WBG Lending, Trade and Treasury',
-  heads:[{n:'Priyesh R',a:'Tower-wide ownership',segs:null},{n:'Jay Panchal',a:'Tower-wide ownership',segs:null}], version: 0}
+  heads:[{n:'Priyesh R',a:'',segs:null},{n:'Jay Panchal',a:'',segs:null}], version: 0}
 ];
 
 /* ---------- helpers ---------- */
@@ -3344,22 +3305,18 @@ function refreshEstateStats(){
 }
 
 /* ── Application List Controller ─────────────────────── */
-let appSelectedId = null;
-let appEditingId  = null;
-let appSortKey    = 'Tower';
-let appSortDir    = 1;
+let appSelectedId  = null;
+let appEditingId   = null;
+let appCurrentRows = [];
+let appSortKey     = 'Tower';
+let appSortDir     = 1;
 
-function selectAppRow(id) {
+window.selectAppRow = function(id) {
   if (appEditingId) return;
-  appSelectedId = (appSelectedId === id ? null : id);
-  const btnEdit = $('#btn-edit-app');
-  const btnDel  = $('#btn-del-app');
-  if (btnEdit) btnEdit.disabled = !appSelectedId;
-  if (btnDel)  btnDel.disabled  = !appSelectedId;
-
+  appSelectedId = id;
   document.querySelectorAll('#t-apps tbody tr').forEach(tr => {
     const radio = tr.querySelector('input[type="radio"]');
-    if (String(tr.dataset.appId) === String(appSelectedId)) {
+    if (tr.dataset.appId == id) {
       tr.classList.add('selected-row');
       if (radio) radio.checked = true;
     } else {
@@ -3367,58 +3324,55 @@ function selectAppRow(id) {
       if (radio) radio.checked = false;
     }
   });
-}
+};
 
-function startAppEdit(id) {
+window.startAppEdit = function(id) {
   if (!id) return;
   appSelectedId = id;
   appEditingId = id;
   renderApps();
-}
+};
 
-function cancelAppEdit() {
+window.cancelAppEdit = function() {
   appEditingId = null;
   renderApps();
-}
+};
 
-async function saveAppEdit(id) {
-  const tr = document.querySelector(`#t-apps tbody tr[data-app-id="${id}"]`);
-  if (!tr) return;
+window.saveAppEdit = async function(id) {
+  const towerEl = document.getElementById('ef-app-tower-' + id);
+  const modEl   = document.getElementById('ef-app-mod-' + id);
+  const nameEl  = document.getElementById('ef-app-name-' + id);
+  const useEl   = document.getElementById('ef-app-usage-' + id);
+  const typeEl  = document.getElementById('ef-app-type-' + id);
+  const techEl  = document.getElementById('ef-app-tech-' + id);
+  const apiEl   = document.getElementById('ef-app-api-' + id);
+  const crEl    = document.getElementById('ef-app-cr-' + id);
 
-  const tower       = tr.querySelector('.e-tower').value.trim();
-  const moduleName  = tr.querySelector('.e-mod').value.trim();
-  const sysName     = tr.querySelector('.e-name').value.trim();
-  const usage       = tr.querySelector('.e-usage').value.trim();
-  const appType     = tr.querySelector('.e-type').value.trim();
-  const tech        = tr.querySelector('.e-tech').value.trim();
-  const hasApi      = tr.querySelector('.e-api').value.trim();
-  const monthlyCr   = parseInt(tr.querySelector('.e-cr').value, 10) || 0;
-
-  if (!sysName) {
-    alert('System Name is required');
+  if (!nameEl || !nameEl.value.trim()) {
+    toast('System Name is required', 'err');
     return;
   }
 
-  const existing = A.find(a => a.id === id);
-  const version = existing ? existing.version : 0;
+  const existing = A.find(a => a.id == id);
+  const version = existing ? (existing.version || 0) : 0;
 
   try {
     const updated = await apiFetch('/api/apps/' + id, {
       method: 'PUT',
       body: JSON.stringify({
-        Tower: tower,
-        Module: moduleName,
-        'System Name': sysName,
-        'Business usage': usage,
-        'Application Type': appType,
-        'Technology Used': tech,
-        'Has API': hasApi,
-        'Approx. Monthly CR Count': String(monthlyCr),
+        Tower: towerEl ? towerEl.value.trim() : 'Tower 1',
+        Module: modEl ? modEl.value.trim() : '',
+        'System Name': nameEl.value.trim(),
+        'Business usage': useEl ? useEl.value.trim() : '',
+        'Application Type': typeEl ? typeEl.value.trim() : '',
+        'Technology Used': techEl ? techEl.value.trim() : '',
+        'Has API': apiEl ? apiEl.value.trim() : 'No',
+        'Approx. Monthly CR Count': String(crEl ? (parseInt(crEl.value, 10) || 0) : 0),
         version
       })
     });
 
-    const idx = A.findIndex(a => a.id === id);
+    const idx = A.findIndex(a => a.id == id);
     if (idx !== -1) {
       A[idx] = { ...A[idx], ...updated };
     }
@@ -3428,17 +3382,17 @@ async function saveAppEdit(id) {
     renderApps();
   } catch (e) {
     if (e.status === 409) {
-      toast('Conflict: Modified by another user. Reloading...', 'err');
+      toast('Update conflict: refreshing latest data', 'err');
       initLiveEstateData();
     } else {
       toast('Failed to save: ' + e.message, 'err');
     }
   }
-}
+};
 
-async function deleteApp(id) {
+window.deleteApp = async function(id) {
   if (!id) return;
-  const app = A.find(a => a.id === id);
+  const app = A.find(a => a.id == id);
   if (!app) return;
 
   if (!confirm(`Are you sure you want to delete application "${app['System Name'] || 'this application'}"?`)) {
@@ -3448,16 +3402,12 @@ async function deleteApp(id) {
   try {
     await apiFetch('/api/apps/' + id, {
       method: 'DELETE',
-      body: JSON.stringify({ version: app.version })
+      body: JSON.stringify({ version: app.version || 0 })
     });
 
-    A = A.filter(a => a.id !== id);
-    appSelectedId = null;
+    A = A.filter(a => a.id != id);
+    if (appSelectedId == id) appSelectedId = null;
     appEditingId = null;
-    const btnEdit = $('#btn-edit-app');
-    const btnDel  = $('#btn-del-app');
-    if (btnEdit) btnEdit.disabled = true;
-    if (btnDel)  btnDel.disabled  = true;
 
     toast('Application deleted');
     refreshEstateStats();
@@ -3465,12 +3415,12 @@ async function deleteApp(id) {
   } catch (e) {
     toast('Failed to delete: ' + e.message, 'err');
   }
-}
+};
 
 function buildAppEditRow(a) {
   return `<tr class="app-edit-row" data-app-id="${a.id}">
     <td>
-      <select class="e-tower">
+      <select id="ef-app-tower-${a.id}">
         <option ${a.Tower==='Tower 1'?'selected':''}>Tower 1</option>
         <option ${a.Tower==='Tower 2'?'selected':''}>Tower 2</option>
         <option ${a.Tower==='Tower 3'?'selected':''}>Tower 3</option>
@@ -3478,24 +3428,24 @@ function buildAppEditRow(a) {
         <option ${a.Tower==='Tower 5'?'selected':''}>Tower 5</option>
       </select>
     </td>
-    <td><input type="text" class="e-mod" list="app-module-list" value="${esc(a.Module||'')}"></td>
-    <td><input type="text" class="e-name" value="${esc(a['System Name']||'')}" required></td>
-    <td><textarea class="e-usage" rows="2">${esc(a['Business usage']||'')}</textarea></td>
-    <td><input type="text" class="e-type" list="app-type-list" value="${esc(a['Application Type']||'')}"></td>
-    <td><textarea class="e-tech" rows="2">${esc(a['Technology Used']||'')}</textarea></td>
+    <td><input type="text" id="ef-app-mod-${a.id}" list="app-module-list" value="${esc(a.Module||a.module||'')}"></td>
+    <td><input type="text" id="ef-app-name-${a.id}" value="${esc(a['System Name']||a.system_name||'')}" required></td>
+    <td><textarea id="ef-app-usage-${a.id}" rows="2">${esc(a['Business usage']||a.business_usage||'')}</textarea></td>
+    <td><input type="text" id="ef-app-type-${a.id}" list="app-type-list" value="${esc(a['Application Type']||a.app_type||'')}"></td>
+    <td><textarea id="ef-app-tech-${a.id}" rows="2">${esc(a['Technology Used']||a.technology||'')}</textarea></td>
     <td>
-      <select class="e-api">
-        <option value="Yes" ${(a['Has API']==='Yes'||a._api==='Yes')?'selected':''}>Yes</option>
-        <option value="No" ${(a['Has API']==='No'||a._api==='No')?'selected':''}>No</option>
-        <option value="Partial" ${(a['Has API']==='Partial'||a._api==='Partial')?'selected':''}>Partial</option>
-        <option value="Not specified" ${(a['Has API']==='Not specified'||a._api==='Not specified')?'selected':''}>Not specified</option>
+      <select id="ef-app-api-${a.id}">
+        <option value="Yes" ${(a['Has API']==='Yes'||a._api==='Yes'||a.has_api==='Yes')?'selected':''}>Yes</option>
+        <option value="No" ${(a['Has API']==='No'||a._api==='No'||a.has_api==='No')?'selected':''}>No</option>
+        <option value="Partial" ${(a['Has API']==='Partial'||a._api==='Partial'||a.has_api==='Partial')?'selected':''}>Partial</option>
+        <option value="Not specified" ${(a['Has API']==='Not specified'||a._api==='Not specified'||a.has_api==='Not specified')?'selected':''}>Not specified</option>
       </select>
     </td>
-    <td><input type="number" min="0" class="e-cr" value="${a._cr ?? a['Approx. Monthly CR Count'] ?? 0}"></td>
+    <td><input type="number" min="0" id="ef-app-cr-${a.id}" value="${a._cr ?? a.monthly_cr ?? a['Approx. Monthly CR Count'] ?? 0}"></td>
     <td style="white-space:nowrap;text-align:right;">
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
-        <button class="btn btn-primary" onclick="saveAppEdit(${a.id})" style="padding:4px 8px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
-        <button class="btn" onclick="cancelAppEdit()" style="padding:4px 8px;font-size:11px;">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAppEdit(${a.id})" style="padding:4px 10px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
+        <button class="btn" onclick="cancelAppEdit()" style="padding:4px 10px;font-size:11px;">Cancel</button>
       </div>
     </td>
   </tr>`;
@@ -3519,16 +3469,22 @@ function renderApps() {
   });
 
   rows = rows.sort((a,b) => {
-    let x = a[appSortKey] ?? a['_' + appSortKey] ?? '';
-    let y = b[appSortKey] ?? b['_' + appSortKey] ?? '';
-    if (typeof x === 'number' || typeof y === 'number') {
-      x = (x === '' || x == null) ? -1 : Number(x);
-      y = (y === '' || y == null) ? -1 : Number(y);
+    if (appSortKey === '_cr') {
+      const x = Number(a._cr ?? a.monthly_cr ?? a['Approx. Monthly CR Count'] ?? 0) || 0;
+      const y = Number(b._cr ?? b.monthly_cr ?? b['Approx. Monthly CR Count'] ?? 0) || 0;
       return (x - y) * appSortDir;
     }
+    if (appSortKey === '_testers') {
+      const x = Number(a._testers || 0);
+      const y = Number(b._testers || 0);
+      return (x - y) * appSortDir;
+    }
+    let x = a[appSortKey] ?? a['_' + appSortKey] ?? '';
+    let y = b[appSortKey] ?? b['_' + appSortKey] ?? '';
     return String(x).localeCompare(String(y)) * appSortDir;
   });
 
+  appCurrentRows = rows;
   $('#cnt-apps').innerHTML = `Showing <b>${rows.length}</b> of <b>${A.length}</b> applications`;
 
   const tbody = $('#t-apps').querySelector('tbody');
@@ -3538,9 +3494,9 @@ function renderApps() {
   }
 
   tbody.innerHTML = rows.map(a => {
-    if (appEditingId === a.id) return buildAppEditRow(a);
+    if (appEditingId == a.id) return buildAppEditRow(a);
 
-    const isSel = (appSelectedId === a.id);
+    const isSel = (appSelectedId == a.id);
     const apiTag = (a._api==='Yes'||a.has_api==='Yes')?'<span class="tag yes">Yes</span>':(a._api==='No'||a.has_api==='No')?'<span class="tag no">No</span>':'<span class="tag part">Partial</span>';
     const crDisplay = a['Approx. Monthly CR Count'] === '' ? '<span style="color:#9AA1AC">&mdash;</span>' : esc(a['Approx. Monthly CR Count'] || a._cr || 0);
 
@@ -3559,22 +3515,18 @@ function renderApps() {
 }
 
 /* ── Current State Team Controller ───────────────────── */
-let teamSelectedId = null;
-let teamEditingId  = null;
-let teamSortKey    = 'Sr No';
-let teamSortDir    = 1;
+let teamSelectedId  = null;
+let teamEditingId   = null;
+let teamCurrentRows = [];
+let teamSortKey     = 'Sr No';
+let teamSortDir     = 1;
 
-function selectTeamRow(id) {
+window.selectTeamRow = function(id) {
   if (teamEditingId) return;
-  teamSelectedId = (teamSelectedId === id ? null : id);
-  const btnEdit = $('#btn-edit-team');
-  const btnDel  = $('#btn-del-team');
-  if (btnEdit) btnEdit.disabled = !teamSelectedId;
-  if (btnDel)  btnDel.disabled  = !teamSelectedId;
-
+  teamSelectedId = id;
   document.querySelectorAll('#t-team tbody tr').forEach(tr => {
     const radio = tr.querySelector('input[type="radio"]');
-    if (String(tr.dataset.teamId) === String(teamSelectedId)) {
+    if (tr.dataset.teamId == id) {
       tr.classList.add('selected-row');
       if (radio) radio.checked = true;
     } else {
@@ -3582,56 +3534,53 @@ function selectTeamRow(id) {
       if (radio) radio.checked = false;
     }
   });
-}
+};
 
-function startTeamEdit(id) {
+window.startTeamEdit = function(id) {
   if (!id) return;
   teamSelectedId = id;
   teamEditingId = id;
   renderTeam();
-}
+};
 
-function cancelTeamEdit() {
+window.cancelTeamEdit = function() {
   teamEditingId = null;
   renderTeam();
-}
+};
 
-async function saveTeamEdit(id) {
-  const tr = document.querySelector(`#t-team tbody tr[data-team-id="${id}"]`);
-  if (!tr) return;
+window.saveTeamEdit = async function(id) {
+  const nameEl = document.getElementById('ef-team-name-' + id);
+  const vendEl = document.getElementById('ef-team-vend-' + id);
+  const segEl  = document.getElementById('ef-team-seg-' + id);
+  const vertEl = document.getElementById('ef-team-vert-' + id);
+  const headEl = document.getElementById('ef-team-head-' + id);
+  const locEl  = document.getElementById('ef-team-loc-' + id);
+  const platEl = document.getElementById('ef-team-plat-' + id);
 
-  const name   = tr.querySelector('.e-name').value.trim();
-  const vend   = tr.querySelector('.e-vend').value.trim();
-  const seg    = tr.querySelector('.e-seg').value.trim();
-  const vert   = tr.querySelector('.e-vert').value.trim();
-  const head   = tr.querySelector('.e-head').value.trim();
-  const loc    = tr.querySelector('.e-loc').value.trim();
-  const plat   = tr.querySelector('.e-plat').value.trim();
-
-  if (!name) {
-    alert('Resource Name is required');
+  if (!nameEl || !nameEl.value.trim()) {
+    toast('Resource Name is required', 'err');
     return;
   }
 
-  const existing = T.find(t => t.id === id);
-  const version = existing ? existing.version : 0;
+  const existing = T.find(t => t.id == id);
+  const version = existing ? (existing.version || 0) : 0;
 
   try {
     const updated = await apiFetch('/api/team/' + id, {
       method: 'PUT',
       body: JSON.stringify({
-        'Resource Name': name,
-        'Current Vendor': vend,
-        'SDG Segment': seg,
-        'SDG Vertical': vert,
-        'SDG Vertical Head': head,
-        Location: loc,
-        'System / Platform Name': plat,
+        'Resource Name': nameEl.value.trim(),
+        'Current Vendor': vendEl ? vendEl.value.trim() : '',
+        'SDG Segment': segEl ? segEl.value.trim() : '',
+        'SDG Vertical': vertEl ? vertEl.value.trim() : '',
+        'SDG Vertical Head': headEl ? headEl.value.trim() : '',
+        Location: locEl ? locEl.value.trim() : 'Mumbai',
+        'System / Platform Name': platEl ? platEl.value.trim() : '',
         version
       })
     });
 
-    const idx = T.findIndex(t => t.id === id);
+    const idx = T.findIndex(t => t.id == id);
     if (idx !== -1) {
       T[idx] = { ...T[idx], ...updated };
     }
@@ -3641,17 +3590,17 @@ async function saveTeamEdit(id) {
     renderTeam();
   } catch (e) {
     if (e.status === 409) {
-      toast('Conflict: Modified by another user. Reloading...', 'err');
+      toast('Update conflict: refreshing latest data', 'err');
       initLiveEstateData();
     } else {
       toast('Failed to save: ' + e.message, 'err');
     }
   }
-}
+};
 
-async function deleteTeam(id) {
+window.deleteTeam = async function(id) {
   if (!id) return;
-  const member = T.find(t => t.id === id);
+  const member = T.find(t => t.id == id);
   if (!member) return;
 
   if (!confirm(`Are you sure you want to delete tester "${member['Resource Name'] || 'this tester'}"?`)) {
@@ -3661,16 +3610,12 @@ async function deleteTeam(id) {
   try {
     await apiFetch('/api/team/' + id, {
       method: 'DELETE',
-      body: JSON.stringify({ version: member.version })
+      body: JSON.stringify({ version: member.version || 0 })
     });
 
-    T = T.filter(t => t.id !== id);
-    teamSelectedId = null;
+    T = T.filter(t => t.id != id);
+    if (teamSelectedId == id) teamSelectedId = null;
     teamEditingId = null;
-    const btnEdit = $('#btn-edit-team');
-    const btnDel  = $('#btn-del-team');
-    if (btnEdit) btnEdit.disabled = true;
-    if (btnDel)  btnDel.disabled  = true;
 
     toast('Team member deleted');
     refreshEstateStats();
@@ -3678,18 +3623,18 @@ async function deleteTeam(id) {
   } catch (e) {
     toast('Failed to delete: ' + e.message, 'err');
   }
-}
+};
 
 function buildTeamEditRow(t) {
   return `<tr class="team-edit-row" data-team-id="${t.id}">
     <td class="num mono">${t['Sr No'] || t.sr_no}</td>
-    <td><input type="text" class="e-name" value="${esc(t['Resource Name']||'')}" required></td>
-    <td><input type="text" class="e-vend" list="team-vend-list" value="${esc(t['Current Vendor']||'')}"></td>
-    <td><input type="text" class="e-seg" list="team-seg-list" value="${esc(t['SDG Segment']||'')}"></td>
-    <td><input type="text" class="e-vert" list="team-vert-list" value="${esc(t['SDG Vertical']||'')}"></td>
-    <td><input type="text" class="e-head" list="team-head-list" value="${esc(t['SDG Vertical Head']||'')}"></td>
+    <td><input type="text" id="ef-team-name-${t.id}" value="${esc(t['Resource Name']||'')}" required></td>
+    <td><input type="text" id="ef-team-vend-${t.id}" list="team-vend-list" value="${esc(t['Current Vendor']||'')}"></td>
+    <td><input type="text" id="ef-team-seg-${t.id}" list="team-seg-list" value="${esc(t['SDG Segment']||'')}"></td>
+    <td><input type="text" id="ef-team-vert-${t.id}" list="team-vert-list" value="${esc(t['SDG Vertical']||'')}"></td>
+    <td><input type="text" id="ef-team-head-${t.id}" list="team-head-list" value="${esc(t['SDG Vertical Head']||'')}"></td>
     <td>
-      <select class="e-loc">
+      <select id="ef-team-loc-${t.id}">
         <option value="Mumbai" ${t.Location==='Mumbai'?'selected':''}>Mumbai</option>
         <option value="Delhi" ${t.Location==='Delhi'?'selected':''}>Delhi</option>
         <option value="Chennai" ${t.Location==='Chennai'?'selected':''}>Chennai</option>
@@ -3698,9 +3643,9 @@ function buildTeamEditRow(t) {
     </td>
     <td>
       <div style="display:flex;gap:6px;align-items:center;">
-        <input type="text" class="e-plat" value="${esc(t['System / Platform Name']||t._platform||'')}" style="flex:1;">
-        <button class="btn btn-primary" onclick="saveTeamEdit(${t.id})" style="padding:4px 8px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
-        <button class="btn" onclick="cancelTeamEdit()" style="padding:4px 8px;font-size:11px;">Cancel</button>
+        <input type="text" id="ef-team-plat-${t.id}" value="${esc(t['System / Platform Name']||t._platform||'')}" style="flex:1;">
+        <button class="btn btn-primary" onclick="saveTeamEdit(${t.id})" style="padding:4px 10px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
+        <button class="btn" onclick="cancelTeamEdit()" style="padding:4px 10px;font-size:11px;">Cancel</button>
       </div>
     </td>
   </tr>`;
@@ -3724,16 +3669,17 @@ function renderTeam() {
   });
 
   rows = rows.sort((a,b) => {
-    let x = a[teamSortKey] ?? '';
-    let y = b[teamSortKey] ?? '';
-    if (typeof x === 'number' || typeof y === 'number') {
-      x = (x === '' || x == null) ? -1 : Number(x);
-      y = (y === '' || y == null) ? -1 : Number(y);
+    if (teamSortKey === 'Sr No') {
+      const x = Number(a['Sr No'] || a.sr_no || 0);
+      const y = Number(b['Sr No'] || b.sr_no || 0);
       return (x - y) * teamSortDir;
     }
+    let x = a[teamSortKey] ?? '';
+    let y = b[teamSortKey] ?? '';
     return String(x).localeCompare(String(y)) * teamSortDir;
   });
 
+  teamCurrentRows = rows;
   $('#cnt-team').innerHTML = `Showing <b>${rows.length}</b> of <b>${T.length}</b> testers`;
 
   const tbody = $('#t-team').querySelector('tbody');
@@ -3743,9 +3689,9 @@ function renderTeam() {
   }
 
   tbody.innerHTML = rows.map(t => {
-    if (teamEditingId === t.id) return buildTeamEditRow(t);
+    if (teamEditingId == t.id) return buildTeamEditRow(t);
 
-    const isSel = (teamSelectedId === t.id);
+    const isSel = (teamSelectedId == t.id);
 
     return `<tr class="${isSel ? 'selected-row' : ''}" data-team-id="${t.id}" onclick="selectTeamRow(${t.id})" ondblclick="startTeamEdit(${t.id})">
       <td class="num mono" style="white-space:nowrap;"><input type="radio" name="team_row_sel" value="${t.id}" ${isSel?'checked':''} style="margin-right:6px;vertical-align:middle;cursor:pointer;">${t['Sr No'] || t.sr_no}</td>
@@ -3760,9 +3706,9 @@ function renderTeam() {
   }).join('');
 }
 
-/* ── Tower Heads & Ownership Matrix Controller ───────── */
-let ownerSelectedKey = null; // format: "twIdx_hIdx"
-let ownerEditingKey  = null;
+/* ── Tower Heads Controller ──────────────────────────── */
+let towerEditing = false;
+let draftTowers = null;
 
 const initials = n => String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
@@ -3772,213 +3718,101 @@ function headCount(h){
   return n || null;
 }
 
-function selectOwnerRow(key) {
-  if (ownerEditingKey) return;
-  ownerSelectedKey = (ownerSelectedKey === key ? null : key);
-  const btnEdit = $('#btn-edit-owner');
-  const btnDel  = $('#btn-del-owner');
-  if (btnEdit) btnEdit.disabled = !ownerSelectedKey;
-  if (btnDel)  btnDel.disabled  = !ownerSelectedKey;
-
-  document.querySelectorAll('#t-tow tbody tr').forEach(tr => {
-    const radio = tr.querySelector('input[type="radio"]');
-    if (tr.dataset.ownerKey === ownerSelectedKey) {
-      tr.classList.add('selected-row');
-      if (radio) radio.checked = true;
-    } else {
-      tr.classList.remove('selected-row');
-      if (radio) radio.checked = false;
-    }
-  });
-}
-
-function startOwnerEdit(key) {
-  if (!key) return;
-  ownerSelectedKey = key;
-  ownerEditingKey = key;
-  renderTowers();
-}
-
-function cancelOwnerEdit() {
-  ownerEditingKey = null;
-  renderTowers();
-}
-
-async function saveOwnerRowEdit(twIdx, hIdx) {
-  const tr = document.querySelector(`#t-tow tbody tr[data-owner-key="${twIdx}_${hIdx}"]`);
-  if (!tr) return;
-
-  const curTw = TOWERS[twIdx];
-  const oldHead = curTw.heads[hIdx];
-
-  const headInp  = tr.querySelector('.e-tow-hn');
-  const areaInp  = tr.querySelector('.e-tow-ha');
-  const scopeInp = tr.querySelector('.e-tow-scope');
-
-  const headName  = headInp ? headInp.value.trim() : '';
-  const areaOwned = areaInp ? areaInp.value.trim() : '';
-
-  if (!headName) {
-    alert('Owner name is required');
-    return;
-  }
-
-  oldHead.n = headName;
-  oldHead.a = areaOwned;
-  if (scopeInp) {
-    curTw.scope = scopeInp.value.trim();
-  }
-
-  try {
-    const updated = await apiFetch('/api/towers/batch', {
-      method: 'PUT',
-      body: JSON.stringify({ towers: TOWERS })
-    });
-    TOWERS = updated;
-    ownerEditingKey = null;
-    toast('Owner updated successfully');
-    refreshEstateStats();
-    renderTowers();
-  } catch(e) {
-    toast('Failed to save owner: ' + e.message, 'err');
-  }
-}
-
-async function deleteOwner(twIdx, hIdx) {
-  const tw = TOWERS[twIdx];
-  if (!tw || !tw.heads || !tw.heads[hIdx]) return;
-  const h = tw.heads[hIdx];
-
-  if (tw.heads.length <= 1) {
-    alert('A tower must have at least one owner');
-    return;
-  }
-
-  if (!confirm(`Are you sure you want to remove owner "${h.n}" from ${tw.t || tw.tower_name}?`)) {
-    return;
-  }
-
-  tw.heads.splice(hIdx, 1);
-
-  try {
-    const updated = await apiFetch('/api/towers/batch', {
-      method: 'PUT',
-      body: JSON.stringify({ towers: TOWERS })
-    });
-    TOWERS = updated;
-    ownerSelectedKey = null;
-    ownerEditingKey  = null;
-    const btnEdit = $('#btn-edit-owner');
-    const btnDel  = $('#btn-del-owner');
-    if (btnEdit) btnEdit.disabled = true;
-    if (btnDel)  btnDel.disabled  = true;
-
-    toast('Owner removed successfully');
-    refreshEstateStats();
-    renderTowers();
-  } catch(e) {
-    toast('Failed to remove owner: ' + e.message, 'err');
-  }
-}
-
-function buildOwnerEditRow(tw, h, twIdx, hIdx, headsCount) {
-  const c = headCount(h);
-  if (hIdx === 0) {
-    return `<tr class="tow-edit-row" data-owner-key="${twIdx}_${hIdx}">
-      <td rowspan="${headsCount}" style="white-space:nowrap;vertical-align:top;padding-top:10px;">
-        <b>${esc(tw.t || tw.tower_name)}</b>
-      </td>
-      <td rowspan="${headsCount}" style="vertical-align:top;padding-top:8px;">
-        <input type="text" class="e-tow-scope" value="${esc(tw.scope||'')}">
-      </td>
-      <td><input type="text" class="e-tow-hn" value="${esc(h.n||'')}" required></td>
-      <td><input type="text" class="e-tow-ha" value="${esc(h.a||'')}"></td>
-      <td rowspan="${headsCount}" style="vertical-align:top;padding-top:10px;">${(tw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
-      <td class="num" rowspan="${headsCount}" style="vertical-align:top;padding-top:10px;">${tw.apps ? tw.apps.length : (A.filter(a=>a.Tower===(tw.t||tw.tower_name))).length}</td>
-      <td style="white-space:nowrap;text-align:right;">
-        <div style="display:flex;gap:4px;align-items:center;justify-content:flex-end;">
-          <button class="btn btn-primary" onclick="saveOwnerRowEdit(${twIdx},${hIdx})" style="padding:3px 8px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
-          <button class="btn" onclick="cancelOwnerEdit()" style="padding:3px 8px;font-size:11px;">Cancel</button>
-        </div>
-      </td>
-    </tr>`;
-  } else {
-    return `<tr class="tow-edit-row" data-owner-key="${twIdx}_${hIdx}">
-      <td><input type="text" class="e-tow-hn" value="${esc(h.n||'')}" required></td>
-      <td><input type="text" class="e-tow-ha" value="${esc(h.a||'')}"></td>
-      <td style="white-space:nowrap;text-align:right;">
-        <div style="display:flex;gap:4px;align-items:center;justify-content:flex-end;">
-          <button class="btn btn-primary" onclick="saveOwnerRowEdit(${twIdx},${hIdx})" style="padding:3px 8px;font-size:11px;background:var(--maroon);color:#fff;">Save</button>
-          <button class="btn" onclick="cancelOwnerEdit()" style="padding:3px 8px;font-size:11px;">Cancel</button>
-        </div>
-      </td>
-    </tr>`;
-  }
-}
-
 function renderTowers() {
   TOWERS.forEach(tw => {
-    tw.apps = A.filter(a => a.Tower === (tw.t || tw.tower_name));
+    tw.apps = A.filter(a => a.Tower === tw.t);
     tw.team = T.filter(t => t['SDG Vertical'] === (tw.vert || tw.vertical));
     tw.segs = [...new Set(tw.team.map(t => t['SDG Segment']))].sort();
     tw.cr   = tw.apps.reduce((s,a) => s + (a._cr || 0), 0);
     tw.vend = new Set(tw.team.map(t => t['Current Vendor'])).size;
   });
 
-  const headTotal = TOWERS.reduce((s,t) => s + (t.heads||[]).length, 0);
+  const headTotal = TOWERS.reduce((s,t) => s + (t.heads || []).length, 0);
 
   $('#tow-lead').innerHTML = `Delivery is organised into <b>${TOWERS.length} towers</b> with <b>${headTotal} named owners</b>. `+
     `Each card below shows the business scope taken from the tower structure, the head or heads accountable for it, and the `+
     `applications, testers, vendors and monthly change volume that sit underneath, drawn from the Q3 workbook.`;
 
-  /* Render 5 Tower Cards cleanly at top — exactly like in original HTML */
   const cardsContainer = $('#tow-cards');
-  cardsContainer.innerHTML = TOWERS.map(tw => `
-    <div class="tcard">
-      <div class="th"><div class="tn">${esc(tw.t || tw.tower_name)}</div><div class="ts">${esc(tw.scope)}</div></div>
-      <div class="tb">${(tw.heads||[]).map(h => {
-        const c = headCount(h);
-        return `
-        <div class="head-row">
-          <span class="avatar">${initials(h.n)}</span>
-          <span><span class="hn">${esc(h.n)}</span><br><span class="ha">${esc(h.a || 'Tower-wide ownership')}</span></span>
-          <span class="hb">${c === null ? 'not in Q3 sheet' : c + ' tester' + (c === 1 ? '' : 's')}</span>
-        </div>`;
-      }).join('')}</div>
-      <div class="tstats">
-        <div><div class="sv">${tw.apps.length}</div><div class="sk">Apps</div></div>
-        <div><div class="sv">${tw.team.length}</div><div class="sk">Testers</div></div>
-        <div><div class="sv">${tw.vend}</div><div class="sk">Vendors</div></div>
-        <div><div class="sv">${tw.cr}</div><div class="sk">CRs / mo</div></div>
+  const hdrBtns = $('#tow-hdr-btns');
+
+  if (towerEditing && draftTowers) {
+    if (hdrBtns) {
+      hdrBtns.innerHTML = `
+        <button class="btn btn-primary" id="btn-save-towers" style="background:var(--maroon);color:#fff;font-size:11px;padding:3px 12px;">Save</button>
+        <button class="btn" id="btn-cancel-towers" style="font-size:11px;padding:3px 12px;margin-left:4px;">Cancel</button>
+      `;
+      document.getElementById('btn-save-towers').onclick = saveTowerBatch;
+      document.getElementById('btn-cancel-towers').onclick = () => { towerEditing = false; draftTowers = null; renderTowers(); };
+    }
+
+    cardsContainer.innerHTML = draftTowers.map((tw, twIdx) => `
+      <div class="tcard tcard-edit">
+        <div class="th">
+          <div class="tn">${esc(tw.t || tw.tower_name)}</div>
+          <input class="inp-scope" id="tw-scope-${twIdx}" value="${esc(tw.scope||'')}" placeholder="Tower Scope" style="width:100%;font-size:12px;padding:5px 7px;border:1px solid #CBD2DB;border-radius:3px;margin:4px 0 10px 0;box-sizing:border-box;">
+        </div>
+        <div class="tb" style="padding-top:10px;">
+          ${(tw.heads||[]).map((h, hIdx) => `
+            <div class="head-edit-row" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+              <span class="avatar">${initials(h.n)}</span>
+              <input class="inp-hn" id="tw-hname-${twIdx}-${hIdx}" placeholder="Owner name" value="${esc(h.n||'')}" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #CBD2DB;border-radius:3px;">
+              <input class="inp-ha" id="tw-harea-${twIdx}-${hIdx}" placeholder="Area owned" value="${esc(h.a||'')}" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #CBD2DB;border-radius:3px;">
+            </div>
+          `).join('')}
+        </div>
+        <div class="tstats">
+          <div><div class="sv">${(A.filter(a=>a.Tower===tw.t)).length}</div><div class="sk">Apps</div></div>
+          <div><div class="sv">${(T.filter(t=>t['SDG Vertical']===(tw.vert||tw.vertical))).length}</div><div class="sk">Testers</div></div>
+          <div><div class="sv">${new Set(T.filter(t=>t['SDG Vertical']===(tw.vert||tw.vertical)).map(t=>t['Current Vendor'])).size}</div><div class="sk">Vendors</div></div>
+          <div><div class="sv">${A.filter(a=>a.Tower===tw.t).reduce((s,a)=>s+(a._cr||0),0)}</div><div class="sk">CRs / mo</div></div>
+        </div>
       </div>
-    </div>`).join('');
+    `).join('');
 
-  /* Render Ownership matrix table */
-  const tbody = $('#t-tow').querySelector('tbody');
-  tbody.innerHTML = TOWERS.map((tw, twIdx) => {
-    const heads = tw.heads || [];
-    return heads.map((h, hIdx) => {
-      const key = twIdx + '_' + hIdx;
-      if (ownerEditingKey === key) {
-        return buildOwnerEditRow(tw, h, twIdx, hIdx, heads.length);
-      }
+  } else {
+    if (hdrBtns) {
+      hdrBtns.innerHTML = `<button class="btn" id="btn-edit-towers" style="font-size:11px;padding:3px 12px;">Edit</button>`;
+      document.getElementById('btn-edit-towers').onclick = () => {
+        towerEditing = true;
+        draftTowers = JSON.parse(JSON.stringify(TOWERS));
+        renderTowers();
+      };
+    }
 
-      const isSel = (ownerSelectedKey === key);
-      const c = headCount(h);
+    cardsContainer.innerHTML = TOWERS.map(tw => `
+      <div class="tcard">
+        <div class="th"><div class="tn">${esc(tw.t || tw.tower_name)}</div><div class="ts">${esc(tw.scope)}</div></div>
+        <div class="tb">${(tw.heads||[]).map(h => {
+          const c = headCount(h);
+          return `
+          <div class="head-row">
+            <span class="avatar">${initials(h.n)}</span>
+            <span><span class="hn">${esc(h.n)}</span><br><span class="ha">${esc(h.a || 'Tower-wide ownership')}</span></span>
+            <span class="hb">${c === null ? 'not in Q3 sheet' : c + ' tester' + (c === 1 ? '' : 's')}</span>
+          </div>`;
+        }).join('')}</div>
+        <div class="tstats">
+          <div><div class="sv">${tw.apps.length}</div><div class="sk">Apps</div></div>
+          <div><div class="sv">${tw.team.length}</div><div class="sk">Testers</div></div>
+          <div><div class="sv">${tw.vend}</div><div class="sk">Vendors</div></div>
+          <div><div class="sv">${tw.cr}</div><div class="sk">CRs / mo</div></div>
+        </div>
+      </div>`).join('');
+  }
 
-      return `<tr class="${isSel ? 'selected-row' : ''}" data-owner-key="${key}" onclick="selectOwnerRow('${key}')" ondblclick="startOwnerEdit('${key}')">
-        ${hIdx === 0 ? `<td rowspan="${heads.length}" style="white-space:nowrap;vertical-align:top;padding-top:10px;">
-          <b>${esc(tw.t || tw.tower_name)}</b>
-        </td>
-        <td rowspan="${heads.length}" style="vertical-align:top;padding-top:10px;">${esc(tw.scope)}</td>` : ''}
-        <td><input type="radio" name="owner_row_sel" value="${key}" ${isSel?'checked':''} style="margin-right:6px;vertical-align:middle;cursor:pointer;"><b>${esc(h.n)}</b></td>
-        <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
-        ${hIdx === 0 ? `<td rowspan="${heads.length}" style="vertical-align:top;padding-top:10px;">${tw.segs.map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
-          <td class="num" rowspan="${heads.length}" style="vertical-align:top;padding-top:10px;">${tw.apps.length}</td>` : ''}
-        <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
-      </tr>`;
-    }).join('');
-  }).join('');
+  /* Matrix table */
+  $('#t-tow').querySelector('tbody').innerHTML = TOWERS.map(tw => (tw.heads || []).map((h, i) => {
+    const c = headCount(h);
+    return `<tr>${i === 0 ? `<td rowspan="${tw.heads.length}"><b>${esc(tw.t || tw.tower_name)}</b></td>
+        <td rowspan="${tw.heads.length}">${esc(tw.scope)}</td>` : ''}
+      <td><b>${esc(h.n)}</b></td>
+      <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
+      ${i === 0 ? `<td rowspan="${tw.heads.length}">${tw.segs.map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
+        <td class="num" rowspan="${tw.heads.length}">${tw.apps.length}</td>` : ''}
+      <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
+    </tr>`;
+  }).join('')).join('');
 
   /* Tower notes */
   const inSheet = new Set(T.map(t => t['SDG Vertical Head']));
@@ -4003,270 +3837,33 @@ function renderTowers() {
   single-owner towers.</p>`;
 }
 
-function wireAppsToolbar() {
-  const btnAdd = $('#btn-add-app');
-  const addForm = $('#app-add-form');
-  if (btnAdd && addForm) {
-    btnAdd.onclick = (e) => {
-      if (e) e.stopPropagation();
-      addForm.style.display = (addForm.style.display === 'none' ? 'block' : 'none');
-      if (addForm.style.display === 'block') {
-        const inpName = $('#add-app-name');
-        if (inpName) inpName.focus();
-      }
-    };
-  }
+async function saveTowerBatch() {
+  if (!draftTowers) return;
+  // Read values from form inputs
+  draftTowers.forEach((tw, twIdx) => {
+    const scopeEl = document.getElementById('tw-scope-' + twIdx);
+    if (scopeEl) tw.scope = scopeEl.value.trim();
+    (tw.heads || []).forEach((h, hIdx) => {
+      const nameEl = document.getElementById('tw-hname-' + twIdx + '-' + hIdx);
+      const areaEl = document.getElementById('tw-harea-' + twIdx + '-' + hIdx);
+      if (nameEl) h.n = nameEl.value.trim();
+      if (areaEl) h.a = areaEl.value.trim();
+    });
+  });
 
-  const btnCancel = $('#btn-cancel-add-app');
-  const btnCancelX = $('#btn-cancel-add-app-x');
-  const hideForm = (e) => {
-    if (e) e.stopPropagation();
-    if (addForm) addForm.style.display = 'none';
-  };
-  if (btnCancel) btnCancel.onclick = hideForm;
-  if (btnCancelX) btnCancelX.onclick = hideForm;
-
-  const btnSave = $('#btn-save-add-app');
-  if (btnSave) {
-    btnSave.onclick = async (e) => {
-      if (e) e.stopPropagation();
-      const tower = ($('#add-app-tower') ? $('#add-app-tower').value : 'Tower 1').trim();
-      const module = ($('#add-app-module') ? $('#add-app-module').value : '').trim();
-      const sysName = ($('#add-app-name') ? $('#add-app-name').value : '').trim();
-      const appType = ($('#add-app-type') ? $('#add-app-type').value : '').trim();
-      const api = ($('#add-app-api') ? $('#add-app-api').value : 'Not specified').trim();
-      const cr = parseInt($('#add-app-cr') ? $('#add-app-cr').value : '0', 10) || 0;
-      const usage = ($('#add-app-usage') ? $('#add-app-usage').value : '').trim();
-      const tech = ($('#add-app-tech') ? $('#add-app-tech').value : '').trim();
-
-      if (!sysName) {
-        alert('System Name is required');
-        return;
-      }
-
-      try {
-        const created = await apiFetch('/api/apps', {
-          method: 'POST',
-          body: JSON.stringify({
-            Tower: tower,
-            Module: module,
-            'System Name': sysName,
-            'Application Type': appType,
-            'APIs Available (Yes / No)': api,
-            'CR Count (Oct-24 to Sep-25)': cr,
-            'Business Usage / Description': usage,
-            'Technology': tech
-          })
-        });
-        A.push(created);
-        hideForm();
-        if ($('#add-app-name')) $('#add-app-name').value = '';
-        if ($('#add-app-usage')) $('#add-app-usage').value = '';
-        if ($('#add-app-cr')) $('#add-app-cr').value = '';
-        toast('Application added successfully');
-        refreshEstateStats();
-        renderApps();
-      } catch (e) {
-        toast('Failed to add application: ' + e.message, 'err');
-      }
-    };
-  }
-
-  const btnEdit = $('#btn-edit-app');
-  if (btnEdit) {
-    btnEdit.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!appSelectedId && A.length) appSelectedId = A[0].id;
-      if (appSelectedId) startAppEdit(appSelectedId);
-    };
-  }
-
-  const btnDel = $('#btn-del-app');
-  if (btnDel) {
-    btnDel.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!appSelectedId) {
-        alert('Please click on an application row to select it for deletion.');
-        return;
-      }
-      deleteApp(appSelectedId);
-    };
-  }
-}
-
-function wireTeamToolbar() {
-  const btnAdd = $('#btn-add-team');
-  const addForm = $('#team-add-form');
-  if (btnAdd && addForm) {
-    btnAdd.onclick = (e) => {
-      if (e) e.stopPropagation();
-      addForm.style.display = (addForm.style.display === 'none' ? 'block' : 'none');
-      if (addForm.style.display === 'block') {
-        const inpName = $('#add-team-name');
-        if (inpName) inpName.focus();
-      }
-    };
-  }
-
-  const btnCancel = $('#btn-cancel-add-team');
-  const btnCancelX = $('#btn-cancel-add-team-x');
-  const hideForm = (e) => {
-    if (e) e.stopPropagation();
-    if (addForm) addForm.style.display = 'none';
-  };
-  if (btnCancel) btnCancel.onclick = hideForm;
-  if (btnCancelX) btnCancelX.onclick = hideForm;
-
-  const btnSave = $('#btn-save-add-team');
-  if (btnSave) {
-    btnSave.onclick = async (e) => {
-      if (e) e.stopPropagation();
-      const name = ($('#add-team-name') ? $('#add-team-name').value : '').trim();
-      const vend = ($('#add-team-vend') ? $('#add-team-vend').value : '').trim();
-      const vert = ($('#add-team-vert') ? $('#add-team-vert').value : '').trim();
-      const seg  = ($('#add-team-seg') ? $('#add-team-seg').value : '').trim();
-      const head = ($('#add-team-head') ? $('#add-team-head').value : '').trim();
-      const loc  = ($('#add-team-loc') ? $('#add-team-loc').value : '').trim();
-      const plat = ($('#add-team-plat') ? $('#add-team-plat').value : '').trim();
-
-      if (!name) {
-        alert('Resource Name is required');
-        return;
-      }
-
-      try {
-        const created = await apiFetch('/api/team', {
-          method: 'POST',
-          body: JSON.stringify({
-            'Resource Name': name,
-            'Current Vendor': vend,
-            'SDG Vertical': vert,
-            'SDG Segment': seg,
-            'SDG Vertical Head': head,
-            'Location': loc,
-            'System / Platform Name': plat
-          })
-        });
-        T.push(created);
-        hideForm();
-        if ($('#add-team-name')) $('#add-team-name').value = '';
-        toast('Team member added successfully');
-        refreshEstateStats();
-        renderTeam();
-      } catch (e) {
-        toast('Failed to add team member: ' + e.message, 'err');
-      }
-    };
-  }
-
-  const btnEdit = $('#btn-edit-team');
-  if (btnEdit) {
-    btnEdit.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!teamSelectedId && T.length) teamSelectedId = T[0].id || T[0].sr_no;
-      if (teamSelectedId) startTeamEdit(teamSelectedId);
-    };
-  }
-
-  const btnDel = $('#btn-del-team');
-  if (btnDel) {
-    btnDel.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!teamSelectedId) {
-        alert('Please click on a team member row to select it for deletion.');
-        return;
-      }
-      deleteTeam(teamSelectedId);
-    };
-  }
-}
-
-function wireOwnerToolbar() {
-  const btnAdd = $('#btn-add-owner');
-  const addForm = $('#owner-add-form');
-  if (btnAdd && addForm) {
-    btnAdd.onclick = (e) => {
-      if (e) e.stopPropagation();
-      addForm.style.display = (addForm.style.display === 'none' ? 'block' : 'none');
-      if (addForm.style.display === 'block') {
-        const inpName = $('#add-owner-name');
-        if (inpName) inpName.focus();
-      }
-    };
-  }
-
-  const btnCancelAdd = $('#btn-cancel-add-owner');
-  const btnCancelAddX = $('#btn-cancel-add-owner-x');
-  const hideAddForm = (e) => {
-    if (e) e.stopPropagation();
-    if (addForm) addForm.style.display = 'none';
-  };
-  if (btnCancelAdd) btnCancelAdd.onclick = hideAddForm;
-  if (btnCancelAddX) btnCancelAddX.onclick = hideAddForm;
-
-  const btnSaveAdd = $('#btn-save-add-owner');
-  if (btnSaveAdd) {
-    btnSaveAdd.onclick = async (e) => {
-      if (e) e.stopPropagation();
-      const towerName = ($('#add-owner-tower') ? $('#add-owner-tower').value : 'Tower 1').trim();
-      const name      = ($('#add-owner-name') ? $('#add-owner-name').value : '').trim();
-      const area      = ($('#add-owner-area') ? $('#add-owner-area').value : '').trim();
-      const scope     = ($('#add-owner-scope') ? $('#add-owner-scope').value : '').trim();
-
-      if (!name) {
-        alert('Owner name is required');
-        return;
-      }
-
-      const tw = TOWERS.find(t => (t.t || t.tower_name) === towerName);
-      if (!tw) return;
-
-      if (!tw.heads) tw.heads = [];
-      tw.heads.push({ n: name, a: area, segs: null });
-      if (scope) tw.scope = scope;
-
-      try {
-        const updated = await apiFetch('/api/towers/batch', {
-          method: 'PUT',
-          body: JSON.stringify({ towers: TOWERS })
-        });
-        TOWERS = updated;
-        hideAddForm();
-        if ($('#add-owner-name')) $('#add-owner-name').value = '';
-        if ($('#add-owner-area')) $('#add-owner-area').value = '';
-        if ($('#add-owner-scope')) $('#add-owner-scope').value = '';
-
-        toast('Owner added successfully');
-        refreshEstateStats();
-        renderTowers();
-      } catch(e) {
-        toast('Failed to add owner: ' + e.message, 'err');
-      }
-    };
-  }
-
-  const btnEdit = $('#btn-edit-owner');
-  if (btnEdit) {
-    btnEdit.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!ownerSelectedKey) {
-        selectOwnerRow('0_0');
-      }
-      if (ownerSelectedKey) startOwnerEdit(ownerSelectedKey);
-    };
-  }
-
-  const btnDel = $('#btn-del-owner');
-  if (btnDel) {
-    btnDel.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!ownerSelectedKey) {
-        alert('Please click on an owner row in the table to select it for deletion.');
-        return;
-      }
-      const [twIdx, hIdx] = ownerSelectedKey.split('_').map(Number);
-      deleteOwner(twIdx, hIdx);
-    };
+  try {
+    const updated = await apiFetch('/api/towers/batch', {
+      method: 'PUT',
+      body: JSON.stringify({ towers: draftTowers })
+    });
+    TOWERS = updated;
+    towerEditing = false;
+    draftTowers = null;
+    toast('Tower configuration saved');
+    refreshEstateStats();
+    renderTowers();
+  } catch (e) {
+    toast('Failed to save towers: ' + e.message, 'err');
   }
 }
 
@@ -4290,10 +3887,297 @@ async function initLiveEstateData() {
   renderTowers();
 }
 
-/* Wire all toolbars */
+/* Wire Application toolbar & add form */
+function wireAppsToolbar() {
+  const qApps = $('#q-apps');
+  if (qApps) qApps.oninput = renderApps;
+
+  const fTow = $('#f-tower'); if (fTow) fTow.onchange = renderApps;
+  const fMod = $('#f-module'); if (fMod) fMod.onchange = renderApps;
+  const fPlat = $('#f-plat'); if (fPlat) fPlat.onchange = renderApps;
+  const fApi = $('#f-api'); if (fApi) fApi.onchange = renderApps;
+
+  const rstApps = $('#rst-apps');
+  if (rstApps) {
+    rstApps.onclick = () => {
+      if (qApps) qApps.value = '';
+      if (fTow) fTow.value = '';
+      if (fMod) fMod.value = '';
+      if (fPlat) fPlat.value = '';
+      if (fApi) fApi.value = '';
+      appSortKey = 'Tower'; appSortDir = 1;
+      document.querySelectorAll('#t-apps thead th[data-k] .ar').forEach(ar => ar.textContent = '▲▼');
+      renderApps();
+    };
+  }
+
+  // Application Table Header Sorting
+  document.querySelectorAll('#t-apps thead th[data-k]').forEach(th => {
+    th.style.cursor = 'pointer';
+    th.onclick = () => {
+      const k = th.dataset.k;
+      if (!k) return;
+      if (appSortKey === k) {
+        appSortDir = -appSortDir;
+      } else {
+        appSortKey = k;
+        appSortDir = 1;
+      }
+      document.querySelectorAll('#t-apps thead th[data-k] .ar').forEach(ar => ar.textContent = '▲▼');
+      const ar = th.querySelector('.ar');
+      if (ar) ar.textContent = (appSortDir === 1 ? '▲' : '▼');
+      renderApps();
+    };
+  });
+
+  const btnAdd = $('#btn-add-app');
+  const addForm = $('#app-add-form');
+  if (btnAdd && addForm) {
+    btnAdd.onclick = (e) => {
+      if (e) e.stopPropagation();
+      addForm.style.display = (addForm.style.display === 'none' ? 'block' : 'none');
+      if (addForm.style.display === 'block') {
+        const inpName = $('#add-app-name');
+        if (inpName) inpName.focus();
+      }
+    };
+  }
+
+  const btnCancelAdd = $('#btn-cancel-add-app');
+  const btnCancelAddX = $('#btn-cancel-add-app-x');
+  const hideAddForm = (e) => {
+    if (e) e.stopPropagation();
+    if (addForm) addForm.style.display = 'none';
+  };
+  if (btnCancelAdd) btnCancelAdd.onclick = hideAddForm;
+  if (btnCancelAddX) btnCancelAddX.onclick = hideAddForm;
+
+  const btnSaveAdd = $('#btn-save-add-app');
+  if (btnSaveAdd) {
+    btnSaveAdd.onclick = async (e) => {
+      if (e) e.stopPropagation();
+      const tower = $('#add-app-tower').value.trim();
+      const mod   = $('#add-app-module').value.trim();
+      const name  = $('#add-app-name').value.trim();
+      const type  = $('#add-app-type').value.trim();
+      const api   = $('#add-app-api').value.trim();
+      const cr    = parseInt($('#add-app-cr').value, 10) || 0;
+      const usage = $('#add-app-usage').value.trim();
+      const tech  = $('#add-app-tech').value.trim();
+
+      if (!name) {
+        toast('System Name is required', 'err');
+        return;
+      }
+
+      try {
+        const created = await apiFetch('/api/apps', {
+          method: 'POST',
+          body: JSON.stringify({
+            Tower: tower,
+            Module: mod,
+            'System Name': name,
+            'Business usage': usage,
+            'Application Type': type,
+            'Technology Used': tech,
+            'Has API': api,
+            'Approx. Monthly CR Count': String(cr)
+          })
+        });
+
+        A.push(created);
+        hideAddForm();
+        $('#add-app-name').value = '';
+        $('#add-app-usage').value = '';
+        $('#add-app-tech').value = '';
+        $('#add-app-cr').value = '';
+
+        toast('Application added successfully');
+        refreshEstateStats();
+        renderApps();
+      } catch (e) {
+        toast('Failed to add application: ' + e.message, 'err');
+      }
+    };
+  }
+
+  const btnEdit = $('#btn-edit-app');
+  if (btnEdit) {
+    btnEdit.onclick = (e) => {
+      if (e) e.stopPropagation();
+      if (!appSelectedId) {
+        if (appCurrentRows && appCurrentRows.length > 0) {
+          appSelectedId = appCurrentRows[0].id;
+        } else if (A.length > 0) {
+          appSelectedId = A[0].id;
+        }
+      }
+      if (!appSelectedId) {
+        toast('No application available to edit', 'err');
+        return;
+      }
+      window.startAppEdit(appSelectedId);
+    };
+  }
+
+  const btnDel = $('#btn-del-app');
+  if (btnDel) {
+    btnDel.onclick = (e) => {
+      if (e) e.stopPropagation();
+      if (!appSelectedId) {
+        toast('Click an application row first to select it for deletion', 'err');
+        return;
+      }
+      window.deleteApp(appSelectedId);
+    };
+  }
+}
+
+/* Wire Team toolbar & add form */
+function wireTeamToolbar() {
+  const qTeam = $('#q-team');
+  if (qTeam) qTeam.oninput = renderTeam;
+
+  const fVert = $('#f-vert'); if (fVert) fVert.onchange = renderTeam;
+  const fSeg = $('#f-seg'); if (fSeg) fSeg.onchange = renderTeam;
+  const fVend = $('#f-vend'); if (fVend) fVend.onchange = renderTeam;
+  const fLoc = $('#f-loc'); if (fLoc) fLoc.onchange = renderTeam;
+
+  const rstTeam = $('#rst-team');
+  if (rstTeam) {
+    rstTeam.onclick = () => {
+      if (qTeam) qTeam.value = '';
+      if (fVert) fVert.value = '';
+      if (fSeg) fSeg.value = '';
+      if (fVend) fVend.value = '';
+      if (fLoc) fLoc.value = '';
+      teamSortKey = 'Sr No'; teamSortDir = 1;
+      document.querySelectorAll('#t-team thead th[data-k] .ar').forEach(ar => ar.textContent = '▲▼');
+      renderTeam();
+    };
+  }
+
+  // Team Table Header Sorting
+  document.querySelectorAll('#t-team thead th[data-k]').forEach(th => {
+    th.style.cursor = 'pointer';
+    th.onclick = () => {
+      const k = th.dataset.k;
+      if (!k) return;
+      if (teamSortKey === k) {
+        teamSortDir = -teamSortDir;
+      } else {
+        teamSortKey = k;
+        teamSortDir = 1;
+      }
+      document.querySelectorAll('#t-team thead th[data-k] .ar').forEach(ar => ar.textContent = '▲▼');
+      const ar = th.querySelector('.ar');
+      if (ar) ar.textContent = (teamSortDir === 1 ? '▲' : '▼');
+      renderTeam();
+    };
+  });
+
+  const btnAdd = $('#btn-add-team');
+  const addForm = $('#team-add-form');
+  if (btnAdd && addForm) {
+    btnAdd.onclick = (e) => {
+      if (e) e.stopPropagation();
+      addForm.style.display = (addForm.style.display === 'none' ? 'block' : 'none');
+      if (addForm.style.display === 'block') {
+        const inpName = $('#add-team-name');
+        if (inpName) inpName.focus();
+      }
+    };
+  }
+
+  const btnCancelAdd = $('#btn-cancel-add-team');
+  const btnCancelAddX = $('#btn-cancel-add-team-x');
+  const hideAddForm = (e) => {
+    if (e) e.stopPropagation();
+    if (addForm) addForm.style.display = 'none';
+  };
+  if (btnCancelAdd) btnCancelAdd.onclick = hideAddForm;
+  if (btnCancelAddX) btnCancelAddX.onclick = hideAddForm;
+
+  const btnSaveAdd = $('#btn-save-add-team');
+  if (btnSaveAdd) {
+    btnSaveAdd.onclick = async (e) => {
+      if (e) e.stopPropagation();
+      const name = $('#add-team-name').value.trim();
+      const vend = $('#add-team-vend').value.trim();
+      const vert = $('#add-team-vert').value.trim();
+      const seg  = $('#add-team-seg').value.trim();
+      const head = $('#add-team-head').value.trim();
+      const loc  = $('#add-team-loc').value.trim();
+      const plat = $('#add-team-plat').value.trim();
+
+      if (!name) {
+        toast('Resource Name is required', 'err');
+        return;
+      }
+
+      try {
+        const created = await apiFetch('/api/team', {
+          method: 'POST',
+          body: JSON.stringify({
+            'Resource Name': name,
+            'Current Vendor': vend,
+            'SDG Vertical': vert,
+            'SDG Segment': seg,
+            'SDG Vertical Head': head,
+            Location: loc,
+            'System / Platform Name': plat
+          })
+        });
+
+        T.push(created);
+        hideAddForm();
+        $('#add-team-name').value = '';
+        $('#add-team-plat').value = '';
+
+        toast('Team member added successfully');
+        refreshEstateStats();
+        renderTeam();
+      } catch (e) {
+        toast('Failed to add team member: ' + e.message, 'err');
+      }
+    };
+  }
+
+  const btnEdit = $('#btn-edit-team');
+  if (btnEdit) {
+    btnEdit.onclick = (e) => {
+      if (e) e.stopPropagation();
+      if (!teamSelectedId) {
+        if (teamCurrentRows && teamCurrentRows.length > 0) {
+          teamSelectedId = teamCurrentRows[0].id;
+        } else if (T.length > 0) {
+          teamSelectedId = T[0].id;
+        }
+      }
+      if (!teamSelectedId) {
+        toast('No team member available to edit', 'err');
+        return;
+      }
+      window.startTeamEdit(teamSelectedId);
+    };
+  }
+
+  const btnDel = $('#btn-del-team');
+  if (btnDel) {
+    btnDel.onclick = (e) => {
+      if (e) e.stopPropagation();
+      if (!teamSelectedId) {
+        toast('Click a team member row first to select it for deletion', 'err');
+        return;
+      }
+      window.deleteTeam(teamSelectedId);
+    };
+  }
+}
+
+/* Initialize all listeners and load live data */
 wireAppsToolbar();
 wireTeamToolbar();
-wireOwnerToolbar();
 refreshEstateStats();
 renderApps();
 renderTeam();
