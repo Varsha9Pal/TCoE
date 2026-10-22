@@ -1,0 +1,19 @@
+{
+  "name": "tcoe-engagement",
+  "version": "1.0.0",
+  "description": "TCoE Engagement tracker — Day 1 Readiness backend",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

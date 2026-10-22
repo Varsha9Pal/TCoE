@@ -1,0 +1,146 @@
+'use strict';
+/**
+ * apps.js — REST API routes for Application List.
+ * Full CRUD with optimistic concurrency control.
+ */
+const express = require('express');
+const router  = express.Router();
+const db      = require('../db');
+
+const ok  = (res, data)        => res.json({ ok: true, data });
+const err = (res, msg, status) => res.status(status || 500).json({ ok: false, error: msg });
+
+function formatApp(r) {
+  return {
+    id:               r.id,
+    Tower:            r.tower,
+    tower:            r.tower,
+    Module:           r.module,
+    module:           r.module,
+    'System Name':    r.system_name,
+    system_name:      r.system_name,
+    'Business usage': r.business_usage,
+    business_usage:   r.business_usage,
+    'Application Type': r.app_type,
+    app_type:         r.app_type,
+    'Technology Used':r.technology,
+    technology:       r.technology,
+    'Has API':        r.has_api,
+    has_api:          r.has_api,
+    'Approx. Monthly CR Count': String(r.monthly_cr),
+    monthly_cr:       r.monthly_cr,
+    _plat:            r.app_type || 'Not specified',
+    _api:             r.has_api || 'No',
+    _cr:              r.monthly_cr,
+    version:          r.version
+  };
+}
+
+/* GET /api/apps */
+router.get('/', (_req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM app_list ORDER BY id').all();
+    ok(res, rows.map(formatApp));
+  } catch (e) {
+    console.error('[apps] GET apps:', e.message);
+    err(res, 'Failed to load applications');
+  }
+});
+
+/* POST /api/apps */
+router.post('/', (req, res) => {
+  const tower          = (req.body.Tower || req.body.tower || '').trim();
+  const moduleName     = (req.body.Module || req.body.module || '').trim();
+  const systemName     = (req.body['System Name'] || req.body.system_name || '').trim();
+  const businessUsage  = (req.body['Business usage'] || req.body.business_usage || '').trim();
+  const appType        = (req.body['Application Type'] || req.body.app_type || '').trim();
+  const technology     = (req.body['Technology Used'] || req.body.technology || '').trim();
+  const hasApi         = (req.body['Has API'] || req.body.has_api || 'No').trim();
+  const monthlyCr      = parseInt(req.body['Approx. Monthly CR Count'] || req.body.monthly_cr || 0, 10) || 0;
+
+  if (!systemName) return err(res, 'System name is required', 400);
+
+  try {
+    const result = db.prepare(`
+      INSERT INTO app_list
+        (tower, module, system_name, business_usage, app_type, technology, has_api, monthly_cr)
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr
+    );
+
+    const created = db.prepare('SELECT * FROM app_list WHERE id = ?').get(result.lastInsertRowid);
+    ok(res, formatApp(created));
+  } catch (e) {
+    console.error('[apps] POST apps:', e.message);
+    err(res, 'Failed to create application');
+  }
+});
+
+/* PUT /api/apps/:id */
+router.put('/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { version } = req.body;
+
+  const tower          = (req.body.Tower || req.body.tower || '').trim();
+  const moduleName     = (req.body.Module || req.body.module || '').trim();
+  const systemName     = (req.body['System Name'] || req.body.system_name || '').trim();
+  const businessUsage  = (req.body['Business usage'] || req.body.business_usage || '').trim();
+  const appType        = (req.body['Application Type'] || req.body.app_type || '').trim();
+  const technology     = (req.body['Technology Used'] || req.body.technology || '').trim();
+  const hasApi         = (req.body['Has API'] || req.body.has_api || 'No').trim();
+  const monthlyCr      = parseInt(req.body['Approx. Monthly CR Count'] || req.body.monthly_cr || 0, 10) || 0;
+
+  if (!systemName) return err(res, 'System name is required', 400);
+  if (version === undefined || version === null) return err(res, 'version is required', 400);
+
+  try {
+    const current = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    if (!current) return err(res, 'Application not found', 404);
+
+    if (current.version !== Number(version)) {
+      return res.status(409).json({
+        ok: false,
+        error: 'This application was modified by another user. Reloading latest data...',
+        serverVersion: current.version
+      });
+    }
+
+    const result = db.prepare(`
+      UPDATE app_list SET
+        tower = ?, module = ?, system_name = ?, business_usage = ?,
+        app_type = ?, technology = ?, has_api = ?, monthly_cr = ?,
+        version = version + 1,
+        updated_at = datetime('now')
+      WHERE id = ? AND version = ?
+    `).run(
+      tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr, id, Number(version)
+    );
+
+    if (result.changes === 0) {
+      return res.status(409).json({ ok: false, error: 'Concurrent update conflict — please refresh.' });
+    }
+
+    const updated = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    ok(res, formatApp(updated));
+  } catch (e) {
+    console.error('[apps] PUT apps:', e.message);
+    err(res, 'Failed to update application');
+  }
+});
+
+/* DELETE /api/apps/:id */
+router.delete('/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  try {
+    const result = db.prepare('DELETE FROM app_list WHERE id = ?').run(id);
+    if (result.changes === 0) return err(res, 'Application not found', 404);
+    ok(res, { id });
+  } catch (e) {
+    console.error('[apps] DELETE apps:', e.message);
+    err(res, 'Failed to delete application');
+  }
+});
+
+module.exports = router;

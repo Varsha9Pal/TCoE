@@ -1,0 +1,688 @@
+[
+  {
+    "sno": 1,
+    "Area": "Proposal",
+    "Description": [
+      "v1.7 final version; 3-year engagement with agreed KPIs"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-10-05",
+    "Status": "Closed",
+    "Note": "",
+    "_date": "2026-10-05",
+    "_due": "05 Oct 2026",
+    "_ord": 739894,
+    "_month": "Oct 2026",
+    "_state": "Closed",
+    "_owner": "Joint / unassigned",
+    "_search": "proposal v1.7 final version; 3-year engagement with agreed kpis closed 05 oct 2026"
+  },
+  {
+    "sno": 2,
+    "Area": "SOW",
+    "Description": [
+      "Shared on 12 Oct; KPIs & SLAs in review",
+      "To be aligned with SDG Heads"
+    ],
+    "Details": [],
+    "Bank": [
+      "Confimatin on application list",
+      "send SOW for review to larger audience"
+    ],
+    "QK": [],
+    "Due": "2026-10-23",
+    "Status": "In-Progress",
+    "Note": "",
+    "_date": "2026-10-23",
+    "_due": "23 Oct 2026",
+    "_ord": 739912,
+    "_month": "Oct 2026",
+    "_state": "In-Progress",
+    "_owner": "Bank",
+    "_search": "sow shared on 12 oct; kpis & slas in review to be aligned with sdg heads confimatin on application list send sow for review to larger audience in-progress 23 oct 2026"
+  },
+  {
+    "sno": 3,
+    "Area": "LOI",
+    "Description": [
+      "LO to start Engagement from 1 Nov '26"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-10-18",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-18",
+    "_due": "18 Oct 2026",
+    "_ord": 739907,
+    "_month": "Oct 2026",
+    "_state": "Overdue",
+    "_owner": "Joint / unassigned",
+    "_search": "loi lo to start engagement from 1 nov '26 planned 18 oct 2026"
+  },
+  {
+    "sno": 4,
+    "Area": "PO",
+    "Description": [
+      "PO for agreed duration"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-10-30",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-30",
+    "_due": "30 Oct 2026",
+    "_ord": 739919,
+    "_month": "Oct 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "po po for agreed duration planned 30 oct 2026"
+  },
+  {
+    "sno": 5,
+    "Area": "Project Kickoff",
+    "Description": [
+      "Meeting to be scheduled"
+    ],
+    "Details": [],
+    "Bank": [
+      "Tentative last week of Oct'26"
+    ],
+    "QK": [
+      "walkthorugh of Project kickoff"
+    ],
+    "Due": "TBD",
+    "Status": "Not set",
+    "Note": "",
+    "_date": "",
+    "_due": "TBD",
+    "_ord": 10000000,
+    "_month": "Not dated",
+    "_state": "Not set",
+    "_owner": "Bank + QK",
+    "_search": "project kickoff meeting to be scheduled tentative last week of oct'26 walkthorugh of project kickoff not set tbd"
+  },
+  {
+    "sno": 6,
+    "Area": "Logistics",
+    "Description": [
+      "Seating arrangements"
+    ],
+    "Details": [
+      "Atleast 53 starting 1st Nov (New staff)",
+      "Mumbai - 44",
+      "Hydrabad - 6",
+      "Chennai - 1",
+      "Delhi - 2"
+    ],
+    "Bank": [
+      "a. Sheet name \"Location & application mapping \"",
+      "b. Vertical Head wise Day 1 loading has to be informed internally and KT plan has to be created for BAU replacement resources"
+    ],
+    "QK": [],
+    "Due": "",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "",
+    "_due": "TBD",
+    "_ord": 10000000,
+    "_month": "Not dated",
+    "_state": "Planned",
+    "_owner": "Bank",
+    "_search": "logistics seating arrangements atleast 53 starting 1st nov (new staff) mumbai - 44 hydrabad - 6 chennai - 1 delhi - 2 a. sheet name \"location & application mapping \" b. vertical head wise day 1 loading has to be informed internally and kt plan has to be created for bau replacement resources planned tbd"
+  },
+  {
+    "sno": 7,
+    "Area": "ID creation",
+    "Description": [
+      "ID creation request for Day 1 resources"
+    ],
+    "Details": [
+      "takes 1 week time, target by last week",
+      "tentative 23rd Oct start"
+    ],
+    "Bank": [],
+    "QK": [
+      "Name",
+      "Mobile number",
+      "Email Id",
+      "Unit & Vertical Head",
+      "Application Name"
+    ],
+    "Due": "",
+    "Status": "Not set",
+    "Note": "",
+    "_date": "",
+    "_due": "TBD",
+    "_ord": 10000000,
+    "_month": "Not dated",
+    "_state": "Not set",
+    "_owner": "QK",
+    "_search": "id creation id creation request for day 1 resources takes 1 week time, target by last week tentative 23rd oct start name mobile number email id unit & vertical head application name not set tbd"
+  },
+  {
+    "sno": 8,
+    "Area": "Assets",
+    "Description": [
+      "VPN access"
+    ],
+    "Details": [
+      "VPN access as interim arrangement during KT sessions"
+    ],
+    "Bank": [
+      "To check VPN access till laptops are procured"
+    ],
+    "QK": [],
+    "Due": "",
+    "Status": "Not set",
+    "Note": "",
+    "_date": "",
+    "_due": "TBD",
+    "_ord": 10000000,
+    "_month": "Not dated",
+    "_state": "Not set",
+    "_owner": "Bank",
+    "_search": "assets vpn access vpn access as interim arrangement during kt sessions to check vpn access till laptops are procured not set tbd"
+  },
+  {
+    "sno": 9,
+    "Area": "Assets",
+    "Description": [
+      "Laptops"
+    ],
+    "Details": [
+      "Total 135 by end of month 3",
+      "Initially 92 i5 / i7 16 GB in Month 1",
+      "15 i7 out of 92"
+    ],
+    "Bank": [
+      "Existing resources laptop configuration at each resource level"
+    ],
+    "QK": [
+      "QK team will be onboarded with laptops"
+    ],
+    "Due": "2026-10-31",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-31",
+    "_due": "31 Oct 2026",
+    "_ord": 739920,
+    "_month": "Oct 2026",
+    "_state": "Planned",
+    "_owner": "Bank + QK",
+    "_search": "assets laptops total 135 by end of month 3 initially 92 i5 / i7 16 gb in month 1 15 i7 out of 92 existing resources laptop configuration at each resource level qk team will be onboarded with laptops planned 31 oct 2026"
+  },
+  {
+    "sno": 10,
+    "Area": "Application access",
+    "Description": [
+      "Access to required applications"
+    ],
+    "Details": [
+      "as per man to man mapping"
+    ],
+    "Bank": [],
+    "QK": [
+      "Application mapping sheet"
+    ],
+    "Due": "2026-11-01",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-01",
+    "_due": "01 Nov 2026",
+    "_ord": 739921,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "QK",
+    "_search": "application access access to required applications as per man to man mapping application mapping sheet planned 01 nov 2026"
+  },
+  {
+    "sno": 11,
+    "Area": "Headcount",
+    "Description": [
+      "Revised Headcount"
+    ],
+    "Details": [
+      "Revise head count from 110 to new one towerwise to be shared"
+    ],
+    "Bank": [],
+    "QK": [
+      "QK to update this file with Rebadging status"
+    ],
+    "Due": "2026-10-23",
+    "Status": "Planned",
+    "Note": "Planned 22-Oct",
+    "_date": "2026-10-23",
+    "_due": "23 Oct 2026",
+    "_ord": 739912,
+    "_month": "Oct 2026",
+    "_state": "Planned",
+    "_owner": "QK",
+    "_search": "headcount revised headcount revise head count from 110 to new one towerwise to be shared qk to update this file with rebadging status planned 23 oct 2026"
+  },
+  {
+    "sno": 12,
+    "Area": "Transition Plan",
+    "Description": [
+      "Notice period of exising staff 110"
+    ],
+    "Details": [
+      "110 - QK (27 staff)"
+    ],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "transition plan notice period of exising staff 110 110 - qk (27 staff) planned 10 nov 2026"
+  },
+  {
+    "sno": 13,
+    "Area": "Tool",
+    "Description": [
+      "TestSigma"
+    ],
+    "Details": [
+      "135 licenses"
+    ],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-01",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-01",
+    "_due": "01 Nov 2026",
+    "_ord": 739921,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "tool testsigma 135 licenses planned 01 nov 2026"
+  },
+  {
+    "sno": 14,
+    "Area": "Tool",
+    "Description": [
+      "JIRA"
+    ],
+    "Details": [
+      "135 licenses"
+    ],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-01",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-01",
+    "_due": "01 Nov 2026",
+    "_ord": 739921,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "tool jira 135 licenses planned 01 nov 2026"
+  },
+  {
+    "sno": 15,
+    "Area": "KT / Transition",
+    "Description": [
+      "Detailed KT Plan to be shared",
+      "SDG Owner name against each 110 existing staff"
+    ],
+    "Details": [
+      "Transition for 100 member team"
+    ],
+    "Bank": [],
+    "QK": [
+      "KT Plan to enable QK asign resource with TM/TL",
+      "resources"
+    ],
+    "Due": "2026-10-21",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-21",
+    "_due": "21 Oct 2026",
+    "_ord": 739910,
+    "_month": "Oct 2026",
+    "_state": "Overdue",
+    "_owner": "QK",
+    "_search": "kt / transition detailed kt plan to be shared sdg owner name against each 110 existing staff transition for 100 member team kt plan to enable qk asign resource with tm/tl resources planned 21 oct 2026"
+  },
+  {
+    "sno": 16,
+    "Area": "Automation",
+    "Description": [
+      "Pragati APK for automation"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [
+      "Loop Ravi S on email"
+    ],
+    "Due": "2026-10-19",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-19",
+    "_due": "19 Oct 2026",
+    "_ord": 739908,
+    "_month": "Oct 2026",
+    "_state": "Overdue",
+    "_owner": "QK",
+    "_search": "automation pragati apk for automation loop ravi s on email planned 19 oct 2026"
+  },
+  {
+    "sno": 17,
+    "Area": "RTM",
+    "Description": [
+      "Existing Collatrals from SDGs in one single folder per application per tower"
+    ],
+    "Details": [
+      "BRD",
+      "Customization CR documents",
+      "Inflight CRs with plans and currrent status of Inflight CRs",
+      "Test Cases",
+      "Defects",
+      "Regression pack per application",
+      "Existing RTM"
+    ],
+    "Bank": [
+      "Ravi to Initiate with SDG team"
+    ],
+    "QK": [],
+    "Due": "2026-10-31",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-31",
+    "_due": "31 Oct 2026",
+    "_ord": 739920,
+    "_month": "Oct 2026",
+    "_state": "Planned",
+    "_owner": "Bank",
+    "_search": "rtm existing collatrals from sdgs in one single folder per application per tower brd customization cr documents inflight crs with plans and currrent status of inflight crs test cases defects regression pack per application existing rtm ravi to initiate with sdg team planned 31 oct 2026"
+  },
+  {
+    "sno": 18,
+    "Area": "KPI",
+    "Description": [
+      "Last 3 months production defects extract"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "kpi last 3 months production defects extract planned 10 nov 2026"
+  },
+  {
+    "sno": 19,
+    "Area": "AI Stategy",
+    "Description": [
+      "Approvals for LLM usage with Testsigma"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-01",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-01",
+    "_due": "01 Nov 2026",
+    "_ord": 739921,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "ai stategy approvals for llm usage with testsigma planned 01 nov 2026"
+  },
+  {
+    "sno": 20,
+    "Area": "Test Data",
+    "Description": [
+      "List of database and access to database access for Test Data role"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "test data list of database and access to database access for test data role planned 10 nov 2026"
+  },
+  {
+    "sno": 21,
+    "Area": "Testing SOP",
+    "Description": [
+      "Current System touchpoint with users and application touchpoints",
+      "Test Strategy",
+      "Signoff process / reviews",
+      "Defect Lifecycle",
+      "Current Test Data strategy & appraoch"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-16",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-16",
+    "_due": "16 Nov 2026",
+    "_ord": 739936,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "testing sop current system touchpoint with users and application touchpoints test strategy signoff process / reviews defect lifecycle current test data strategy & appraoch planned 16 nov 2026"
+  },
+  {
+    "sno": 22,
+    "Area": "CR data",
+    "Description": [
+      "Last 6 months CR data application wise"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-16",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-16",
+    "_due": "16 Nov 2026",
+    "_ord": 739936,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "cr data last 6 months cr data application wise planned 16 nov 2026"
+  },
+  {
+    "sno": 23,
+    "Area": "CR Demand",
+    "Description": [
+      "Next 3 months CR aapplication wise"
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-16",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-16",
+    "_due": "16 Nov 2026",
+    "_ord": 739936,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "cr demand next 3 months cr aapplication wise planned 16 nov 2026"
+  },
+  {
+    "sno": 24,
+    "Area": "Governance",
+    "Description": [
+      "Meeting with Vikas"
+    ],
+    "Details": [
+      "to strart with 2 time in a week and then weekly once"
+    ],
+    "Bank": [
+      "Himanshu to speak with Vikas on this and Ravi S to schedule"
+    ],
+    "QK": [],
+    "Due": "2026-10-17",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-10-17",
+    "_due": "17 Oct 2026",
+    "_ord": 739906,
+    "_month": "Oct 2026",
+    "_state": "Overdue",
+    "_owner": "Bank",
+    "_search": "governance meeting with vikas to strart with 2 time in a week and then weekly once himanshu to speak with vikas on this and ravi s to schedule planned 17 oct 2026"
+  },
+  {
+    "sno": 25,
+    "Area": "Governance forums",
+    "Description": [
+      "Agree daily/weekly/monthly governance forums"
+    ],
+    "Details": [
+      "Daily syncup with Core Group Bank + QK",
+      "Weekly: Himanshu + SDG heads",
+      "Fortnightly: SDG heads",
+      "Monthly Steerco: Vikas → Vivek P, Ravi G",
+      "Quarterly CXO connect"
+    ],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "governance forums agree daily/weekly/monthly governance forums daily syncup with core group bank + qk weekly: himanshu + sdg heads fortnightly: sdg heads monthly steerco: vikas → vivek p, ravi g quarterly cxo connect planned 10 nov 2026"
+  },
+  {
+    "sno": 26,
+    "Area": "API Inventory",
+    "Description": [
+      "Provide API inventory, Swagger/OpenAPI specifications, endpoints, authentication, certificates, test accounts and consumer/producer dependency details."
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "api inventory provide api inventory, swagger/openapi specifications, endpoints, authentication, certificates, test accounts and consumer/producer dependency details. planned 10 nov 2026"
+  },
+  {
+    "sno": 27,
+    "Area": "Authentication and control bypasses",
+    "Description": [
+      "Approve the use of static OTP and agreed test bypasses for CAPTCHA, biometric and MDM controls where automation is not feasible; document security controls."
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "authentication and control bypasses approve the use of static otp and agreed test bypasses for captcha, biometric and mdm controls where automation is not feasible; document security controls. planned 10 nov 2026"
+  },
+  {
+    "sno": 28,
+    "Area": "Source control and pipelines",
+    "Description": [
+      "Provide approved repositories, branching strategy, build agents, pipeline access, secrets management and deployment hooks for automation assets."
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "source control and pipelines provide approved repositories, branching strategy, build agents, pipeline access, secrets management and deployment hooks for automation assets. planned 10 nov 2026"
+  },
+  {
+    "sno": 29,
+    "Area": "Technical support contacts",
+    "Description": [
+      "Provide named DBA, OS, application administrator, network, infrastructure, Environment Support, OEM Suport Contact, production support and development contacts for each tower/application."
+    ],
+    "Details": [],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-10",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-10",
+    "_due": "10 Nov 2026",
+    "_ord": 739930,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "technical support contacts provide named dba, os, application administrator, network, infrastructure, environment support, oem suport contact, production support and development contacts for each tower/application. planned 10 nov 2026"
+  },
+  {
+    "sno": 30,
+    "Area": "Tool",
+    "Description": [
+      "Power BI licenses"
+    ],
+    "Details": [
+      "2 developer licenses"
+    ],
+    "Bank": [],
+    "QK": [],
+    "Due": "2026-11-16",
+    "Status": "Planned",
+    "Note": "",
+    "_date": "2026-11-16",
+    "_due": "16 Nov 2026",
+    "_ord": 739936,
+    "_month": "Nov 2026",
+    "_state": "Planned",
+    "_owner": "Joint / unassigned",
+    "_search": "tool power bi licenses 2 developer licenses planned 16 nov 2026"
+  }
+]
