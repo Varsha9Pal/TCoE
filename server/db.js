@@ -12,41 +12,42 @@ const dbPath = process.env.DB_PATH
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
-/* ── Open database (better-sqlite3 with node:sqlite fallback) ── */
+/* ── Open database (Node.js built-in SQLite with better-sqlite3 fallback) ── */
 let db;
-let Database;
 
 try {
-  Database = require('better-sqlite3');
-  db = new Database(dbPath);
+  // 1. Try Node.js built-in SQLite (Node 22+) — zero dependencies, zero compilation
+  const { DatabaseSync } = require('node:sqlite');
+  db = new DatabaseSync(dbPath);
+  db.pragma = (str) => {
+    try { db.exec('PRAGMA ' + str); } catch (_) {}
+  };
   db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys  = ON');
-  console.log('[db] ✓ SQLite database ready (better-sqlite3) at', dbPath);
+  db.pragma('foreign_keys = ON');
+
+  db.transaction = (fn) => {
+    return (...args) => {
+      db.exec('BEGIN');
+      try {
+        const res = fn(...args);
+        db.exec('COMMIT');
+        return res;
+      } catch (e) {
+        try { db.exec('ROLLBACK'); } catch (_) {}
+        throw e;
+      }
+    };
+  };
+
+  console.log('[db] ✓ SQLite ready using Node.js built-in SQLite at', dbPath);
 } catch (err) {
   try {
-    const { DatabaseSync } = require('node:sqlite');
-    db = new DatabaseSync(dbPath);
-    db.pragma = (str) => {
-      try { db.exec('PRAGMA ' + str); } catch (_) {}
-    };
+    // 2. Fallback to better-sqlite3 (Node 18/20)
+    const Database = require('better-sqlite3');
+    db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
-    db.pragma('foreign_keys = ON');
-
-    db.transaction = (fn) => {
-      return (...args) => {
-        db.exec('BEGIN');
-        try {
-          const res = fn(...args);
-          db.exec('COMMIT');
-          return res;
-        } catch (e) {
-          try { db.exec('ROLLBACK'); } catch (_) {}
-          throw e;
-        }
-      };
-    };
-
-    console.log('[db] ✓ SQLite database ready (node:sqlite built-in) at', dbPath);
+    db.pragma('foreign_keys  = ON');
+    console.log('[db] ✓ SQLite ready using better-sqlite3 at', dbPath);
   } catch (err2) {
     console.error('[db] ✗ Failed to open SQLite database:', err.message, err2.message);
     process.exit(1);
