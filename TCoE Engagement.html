@@ -307,6 +307,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 #t-d1 tbody tr.selected-row td { background: #FDF2F4 !important; }
 #t-d1 tbody tr.selected-row { outline: 2px solid var(--maroon); outline-offset: -2px; }
 
+/* ownership matrix inline edit */
+.matrix-edit-row td { background: #FDF6F8 !important; padding: 6px 8px !important; }
+.matrix-edit-row input.ef-matrix-scope,
+.matrix-edit-row input.ef-matrix-head,
+.matrix-edit-row input.ef-matrix-area {
+  font: inherit; font-size: 12px; padding: 4px 6px; border: 1px solid #CBD2DB;
+  border-radius: 3px; background: #fff; color: var(--ink); width: 100%; box-sizing: border-box;
+}
+.matrix-edit-row input:focus {
+  outline: 2px solid rgba(142,21,55,.25); border-color: var(--maroon);
+}
+
 /* inline edit row */
 .d1-edit-row td{background:#FDF6F8!important;padding:8px 10px!important;}
 .d1-edit-row input,.d1-edit-row select,.d1-edit-row textarea{
@@ -2695,16 +2707,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
   <!-- ===================== TOWER HEADS ===================== -->
   <section class="view" id="view-towers">
-    <div class="sec-h">
-      <h2>Tower heads</h2>
-      <div class="rule"></div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span class="hint">Ownership across the five delivery towers</span>
-        <div id="tow-hdr-btns">
-          <button class="btn" id="btn-edit-towers" style="font-size:11px;padding:3px 12px;">Edit</button>
-        </div>
-      </div>
-    </div>
+    <div class="sec-h"><h2>Tower heads</h2><div class="rule"></div><span class="hint">Ownership across the five delivery towers</span></div>
     <p class="lead" id="tow-lead">Delivery is organised into <b>5 towers</b> with <b>9 named owners</b>. Each card below shows the business scope taken from the tower structure, the head or heads accountable for it, and the applications, testers, vendors and monthly change volume that sit underneath, drawn from the Q3 workbook.</p>
     <div class="towers" id="tow-cards">
   <div class="tcard">
@@ -2803,7 +2806,13 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </div>
   </div></div>
 
-    <div class="sec-h"><h2>Ownership matrix</h2><div class="rule"></div></div>
+    <div class="sec-h">
+      <h2>Ownership matrix</h2>
+      <div class="rule"></div>
+      <div id="matrix-hdr-btns">
+        <button class="btn" id="btn-edit-matrix" style="font-size:11px;padding:3px 12px;">Edit</button>
+      </div>
+    </div>
     <div class="tablewrap" style="max-height:none;margin-bottom:22px">
       <table class="data" id="t-tow">
         <thead><tr>
@@ -3706,9 +3715,9 @@ function renderTeam() {
   }).join('');
 }
 
-/* ── Tower Heads Controller ──────────────────────────── */
-let towerEditing = false;
-let draftTowers = null;
+/* ── Tower Heads & Ownership Matrix Controller ───────── */
+let matrixEditing = false;
+let draftTowers   = null;
 
 const initials = n => String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
@@ -3733,86 +3742,85 @@ function renderTowers() {
     `Each card below shows the business scope taken from the tower structure, the head or heads accountable for it, and the `+
     `applications, testers, vendors and monthly change volume that sit underneath, drawn from the Q3 workbook.`;
 
-  const cardsContainer = $('#tow-cards');
-  const hdrBtns = $('#tow-hdr-btns');
-
-  if (towerEditing && draftTowers) {
-    if (hdrBtns) {
-      hdrBtns.innerHTML = `
-        <button class="btn btn-primary" id="btn-save-towers" style="background:var(--maroon);color:#fff;font-size:11px;padding:3px 12px;">Save</button>
-        <button class="btn" id="btn-cancel-towers" style="font-size:11px;padding:3px 12px;margin-left:4px;">Cancel</button>
-      `;
-      document.getElementById('btn-save-towers').onclick = saveTowerBatch;
-      document.getElementById('btn-cancel-towers').onclick = () => { towerEditing = false; draftTowers = null; renderTowers(); };
-    }
-
-    cardsContainer.innerHTML = draftTowers.map((tw, twIdx) => `
-      <div class="tcard tcard-edit">
-        <div class="th">
-          <div class="tn">${esc(tw.t || tw.tower_name)}</div>
-          <input class="inp-scope" id="tw-scope-${twIdx}" value="${esc(tw.scope||'')}" placeholder="Tower Scope" style="width:100%;font-size:12px;padding:5px 7px;border:1px solid #CBD2DB;border-radius:3px;margin:4px 0 10px 0;box-sizing:border-box;">
-        </div>
-        <div class="tb" style="padding-top:10px;">
-          ${(tw.heads||[]).map((h, hIdx) => `
-            <div class="head-edit-row" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-              <span class="avatar">${initials(h.n)}</span>
-              <input class="inp-hn" id="tw-hname-${twIdx}-${hIdx}" placeholder="Owner name" value="${esc(h.n||'')}" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #CBD2DB;border-radius:3px;">
-              <input class="inp-ha" id="tw-harea-${twIdx}-${hIdx}" placeholder="Area owned" value="${esc(h.a||'')}" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #CBD2DB;border-radius:3px;">
-            </div>
-          `).join('')}
-        </div>
-        <div class="tstats">
-          <div><div class="sv">${(A.filter(a=>a.Tower===tw.t)).length}</div><div class="sk">Apps</div></div>
-          <div><div class="sv">${(T.filter(t=>t['SDG Vertical']===(tw.vert||tw.vertical))).length}</div><div class="sk">Testers</div></div>
-          <div><div class="sv">${new Set(T.filter(t=>t['SDG Vertical']===(tw.vert||tw.vertical)).map(t=>t['Current Vendor'])).size}</div><div class="sk">Vendors</div></div>
-          <div><div class="sv">${A.filter(a=>a.Tower===tw.t).reduce((s,a)=>s+(a._cr||0),0)}</div><div class="sk">CRs / mo</div></div>
-        </div>
+  // Tower Cards: always clean view cards
+  $('#tow-cards').innerHTML = TOWERS.map(tw => `
+    <div class="tcard">
+      <div class="th"><div class="tn">${esc(tw.t || tw.tower_name)}</div><div class="ts">${esc(tw.scope)}</div></div>
+      <div class="tb">${(tw.heads||[]).map(h => {
+        const c = headCount(h);
+        return `
+        <div class="head-row">
+          <span class="avatar">${initials(h.n)}</span>
+          <span><span class="hn">${esc(h.n)}</span><br><span class="ha">${esc(h.a || 'Tower-wide ownership')}</span></span>
+          <span class="hb">${c === null ? 'not in Q3 sheet' : c + ' tester' + (c === 1 ? '' : 's')}</span>
+        </div>`;
+      }).join('')}</div>
+      <div class="tstats">
+        <div><div class="sv">${tw.apps.length}</div><div class="sk">Apps</div></div>
+        <div><div class="sv">${tw.team.length}</div><div class="sk">Testers</div></div>
+        <div><div class="sv">${tw.vend}</div><div class="sk">Vendors</div></div>
+        <div><div class="sv">${tw.cr}</div><div class="sk">CRs / mo</div></div>
       </div>
-    `).join('');
+    </div>`).join('');
 
-  } else {
-    if (hdrBtns) {
-      hdrBtns.innerHTML = `<button class="btn" id="btn-edit-towers" style="font-size:11px;padding:3px 12px;">Edit</button>`;
-      document.getElementById('btn-edit-towers').onclick = () => {
-        towerEditing = true;
+  // Ownership Matrix Header Buttons
+  const matrixHdrBtns = document.getElementById('matrix-hdr-btns');
+  if (matrixHdrBtns) {
+    if (matrixEditing) {
+      matrixHdrBtns.innerHTML = `
+        <button class="btn btn-primary" id="btn-save-matrix" style="background:var(--maroon);color:#fff;font-size:11px;padding:3px 12px;">Save</button>
+        <button class="btn" id="btn-cancel-matrix" style="font-size:11px;padding:3px 12px;margin-left:4px;">Cancel</button>
+      `;
+      document.getElementById('btn-save-matrix').onclick = saveMatrixBatch;
+      document.getElementById('btn-cancel-matrix').onclick = () => {
+        matrixEditing = false;
+        draftTowers = null;
+        renderTowers();
+      };
+    } else {
+      matrixHdrBtns.innerHTML = `<button class="btn" id="btn-edit-matrix" style="font-size:11px;padding:3px 12px;">Edit</button>`;
+      document.getElementById('btn-edit-matrix').onclick = () => {
+        matrixEditing = true;
         draftTowers = JSON.parse(JSON.stringify(TOWERS));
         renderTowers();
       };
     }
-
-    cardsContainer.innerHTML = TOWERS.map(tw => `
-      <div class="tcard">
-        <div class="th"><div class="tn">${esc(tw.t || tw.tower_name)}</div><div class="ts">${esc(tw.scope)}</div></div>
-        <div class="tb">${(tw.heads||[]).map(h => {
-          const c = headCount(h);
-          return `
-          <div class="head-row">
-            <span class="avatar">${initials(h.n)}</span>
-            <span><span class="hn">${esc(h.n)}</span><br><span class="ha">${esc(h.a || 'Tower-wide ownership')}</span></span>
-            <span class="hb">${c === null ? 'not in Q3 sheet' : c + ' tester' + (c === 1 ? '' : 's')}</span>
-          </div>`;
-        }).join('')}</div>
-        <div class="tstats">
-          <div><div class="sv">${tw.apps.length}</div><div class="sk">Apps</div></div>
-          <div><div class="sv">${tw.team.length}</div><div class="sk">Testers</div></div>
-          <div><div class="sv">${tw.vend}</div><div class="sk">Vendors</div></div>
-          <div><div class="sv">${tw.cr}</div><div class="sk">CRs / mo</div></div>
-        </div>
-      </div>`).join('');
   }
 
-  /* Matrix table */
-  $('#t-tow').querySelector('tbody').innerHTML = TOWERS.map(tw => (tw.heads || []).map((h, i) => {
-    const c = headCount(h);
-    return `<tr>${i === 0 ? `<td rowspan="${tw.heads.length}"><b>${esc(tw.t || tw.tower_name)}</b></td>
-        <td rowspan="${tw.heads.length}">${esc(tw.scope)}</td>` : ''}
-      <td><b>${esc(h.n)}</b></td>
-      <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
-      ${i === 0 ? `<td rowspan="${tw.heads.length}">${tw.segs.map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
-        <td class="num" rowspan="${tw.heads.length}">${tw.apps.length}</td>` : ''}
-      <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
-    </tr>`;
-  }).join('')).join('');
+  // Ownership Matrix Table
+  const matrixList = (matrixEditing && draftTowers) ? draftTowers : TOWERS;
+  const tbody = $('#t-tow').querySelector('tbody');
+
+  if (matrixEditing) {
+    tbody.innerHTML = matrixList.map((tw, twIdx) => (tw.heads || []).map((h, hIdx) => {
+      const origTw = TOWERS[twIdx] || tw;
+      const c = headCount(h);
+      return `<tr class="matrix-edit-row">
+        ${hIdx === 0 ? `<td rowspan="${tw.heads.length}" style="vertical-align:middle;"><b>${esc(tw.t || tw.tower_name)}</b></td>
+          <td rowspan="${tw.heads.length}" style="vertical-align:middle;">
+            <input type="text" class="ef-matrix-scope" id="mat-scope-${twIdx}" value="${esc(tw.scope||'')}" placeholder="Business Scope">
+          </td>` : ''}
+        <td><input type="text" class="ef-matrix-head" id="mat-head-${twIdx}-${hIdx}" value="${esc(h.n||'')}" placeholder="Head Name"></td>
+        <td><input type="text" class="ef-matrix-area" id="mat-area-${twIdx}-${hIdx}" value="${esc(h.a||'')}" placeholder="Area Owned"></td>
+        ${hIdx === 0 ? `<td rowspan="${tw.heads.length}" style="vertical-align:middle;">${(origTw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
+          <td class="num" rowspan="${tw.heads.length}" style="vertical-align:middle;">${(origTw.apps||[]).length}</td>` : ''}
+        <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
+      </tr>`;
+    }).join('')).join('');
+  } else {
+    tbody.innerHTML = TOWERS.map(tw => (tw.heads || []).map((h, i) => {
+      const c = headCount(h);
+      return `<tr>
+        ${i === 0 ? `<td rowspan="${tw.heads.length}"><b>${esc(tw.t || tw.tower_name)}</b></td>
+          <td rowspan="${tw.heads.length}">${esc(tw.scope)}</td>` : ''}
+        <td><b>${esc(h.n)}</b></td>
+        <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
+        ${i === 0 ? `<td rowspan="${tw.heads.length}">${(tw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
+          <td class="num" rowspan="${tw.heads.length}">${(tw.apps||[]).length}</td>` : ''}
+        <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
+      </tr>`;
+    }).join('')).join('');
+  }
 
   /* Tower notes */
   const inSheet = new Set(T.map(t => t['SDG Vertical Head']));
@@ -3837,15 +3845,14 @@ function renderTowers() {
   single-owner towers.</p>`;
 }
 
-async function saveTowerBatch() {
+async function saveMatrixBatch() {
   if (!draftTowers) return;
-  // Read values from form inputs
   draftTowers.forEach((tw, twIdx) => {
-    const scopeEl = document.getElementById('tw-scope-' + twIdx);
+    const scopeEl = document.getElementById('mat-scope-' + twIdx);
     if (scopeEl) tw.scope = scopeEl.value.trim();
     (tw.heads || []).forEach((h, hIdx) => {
-      const nameEl = document.getElementById('tw-hname-' + twIdx + '-' + hIdx);
-      const areaEl = document.getElementById('tw-harea-' + twIdx + '-' + hIdx);
+      const nameEl = document.getElementById('mat-head-' + twIdx + '-' + hIdx);
+      const areaEl = document.getElementById('mat-area-' + twIdx + '-' + hIdx);
       if (nameEl) h.n = nameEl.value.trim();
       if (areaEl) h.a = areaEl.value.trim();
     });
@@ -3857,13 +3864,13 @@ async function saveTowerBatch() {
       body: JSON.stringify({ towers: draftTowers })
     });
     TOWERS = updated;
-    towerEditing = false;
+    matrixEditing = false;
     draftTowers = null;
-    toast('Tower configuration saved');
+    toast('Ownership matrix updated successfully');
     refreshEstateStats();
     renderTowers();
   } catch (e) {
-    toast('Failed to save towers: ' + e.message, 'err');
+    toast('Failed to save ownership matrix: ' + e.message, 'err');
   }
 }
 
