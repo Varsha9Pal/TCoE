@@ -49,10 +49,23 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[server] TCoE Engagement running on http://0.0.0.0:${PORT}`);
-  console.log(`[server] Open http://localhost:${PORT} in your browser`);
-  console.log(`[server] Other computers on the network: http://<this-machine-IP>:${PORT}`);
-});
+function startServer(port) {
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`[server] TCoE Engagement running on http://localhost:${port}`);
+    console.log(`[server] Open http://localhost:${port} in your browser`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      const nextPort = Number(port) + 1;
+      console.warn(`[server] Port ${port} is in use. Trying port ${nextPort}...`);
+      startServer(nextPort);
+    } else {
+      console.error('[server] Server error:', err.message);
+    }
+  });
+}
+
+startServer(PORT);
 
 module.exports = app;
