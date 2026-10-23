@@ -318,6 +318,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .matrix-edit-row input:focus {
   outline: 2px solid rgba(142,21,55,.25); border-color: var(--maroon);
 }
+.btn-del-matrix-head:hover:not(:disabled) {
+  background: #FDF2F4 !important; border-color: #A3252A !important;
+}
+.btn-add-matrix-head:hover {
+  background: #6B0F28 !important;
+}
 
 /* inline edit row */
 .d1-edit-row td{background:#FDF6F8!important;padding:8px 10px!important;}
@@ -3792,34 +3798,52 @@ function renderTowers() {
   const tbody = $('#t-tow').querySelector('tbody');
 
   if (matrixEditing) {
-    tbody.innerHTML = matrixList.map((tw, twIdx) => (tw.heads || []).map((h, hIdx) => {
-      const origTw = TOWERS[twIdx] || tw;
-      const c = headCount(h);
-      return `<tr class="matrix-edit-row">
-        ${hIdx === 0 ? `<td rowspan="${tw.heads.length}" style="vertical-align:middle;"><b>${esc(tw.t || tw.tower_name)}</b></td>
-          <td rowspan="${tw.heads.length}" style="vertical-align:middle;">
-            <input type="text" class="ef-matrix-scope" id="mat-scope-${twIdx}" value="${esc(tw.scope||'')}" placeholder="Business Scope">
-          </td>` : ''}
-        <td><input type="text" class="ef-matrix-head" id="mat-head-${twIdx}-${hIdx}" value="${esc(h.n||'')}" placeholder="Head Name"></td>
-        <td><input type="text" class="ef-matrix-area" id="mat-area-${twIdx}-${hIdx}" value="${esc(h.a||'')}" placeholder="Area Owned"></td>
-        ${hIdx === 0 ? `<td rowspan="${tw.heads.length}" style="vertical-align:middle;">${(origTw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
-          <td class="num" rowspan="${tw.heads.length}" style="vertical-align:middle;">${(origTw.apps||[]).length}</td>` : ''}
-        <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
-      </tr>`;
-    }).join('')).join('');
+    tbody.innerHTML = matrixList.map((tw, twIdx) => {
+      const heads = (tw.heads && tw.heads.length > 0) ? tw.heads : [{ n: '', a: '', segs: null }];
+      const rowSpan = heads.length;
+      return heads.map((h, hIdx) => {
+        const origTw = TOWERS[twIdx] || tw;
+        const c = headCount(h);
+        return `<tr class="matrix-edit-row">
+          ${hIdx === 0 ? `<td rowspan="${rowSpan}" style="vertical-align:middle;">
+              <div style="font-weight:700;margin-bottom:6px;">${esc(tw.t || tw.tower_name)}</div>
+              <button type="button" class="btn btn-add-matrix-head" onclick="addMatrixHead(${twIdx})" style="font-size:10.5px;padding:3px 8px;background:var(--maroon);color:#fff;border-radius:3px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;" title="Add head under ${esc(tw.t || tw.tower_name)}">
+                <span style="font-weight:bold;font-size:12px;line-height:1;">+</span> Add Head
+              </button>
+            </td>
+            <td rowspan="${rowSpan}" style="vertical-align:middle;">
+              <input type="text" class="ef-matrix-scope" id="mat-scope-${twIdx}" value="${esc(tw.scope||'')}" placeholder="Business Scope">
+            </td>` : ''}
+          <td><input type="text" class="ef-matrix-head" id="mat-head-${twIdx}-${hIdx}" value="${esc(h.n||'')}" placeholder="Head Name"></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="text" class="ef-matrix-area" id="mat-area-${twIdx}-${hIdx}" value="${esc(h.a||'')}" placeholder="Area Owned" style="flex:1;min-width:0;">
+              <button type="button" class="btn btn-del-matrix-head" onclick="removeMatrixHead(${twIdx}, ${hIdx})" style="padding:2px 7px;font-size:13px;line-height:1;color:#A3252A;border:1px solid #E8C5C8;background:#fff;border-radius:3px;cursor:pointer;${rowSpan <= 1 ? 'opacity:0.4;cursor:not-allowed;' : ''}" title="${rowSpan <= 1 ? 'Each tower must have at least one head' : 'Remove this head & area'}" ${rowSpan <= 1 ? 'disabled' : ''}>&times;</button>
+            </div>
+          </td>
+          ${hIdx === 0 ? `<td rowspan="${rowSpan}" style="vertical-align:middle;">${(origTw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
+            <td class="num" rowspan="${rowSpan}" style="vertical-align:middle;">${(origTw.apps||[]).length}</td>` : ''}
+          <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
+        </tr>`;
+      }).join('');
+    }).join('');
   } else {
-    tbody.innerHTML = TOWERS.map(tw => (tw.heads || []).map((h, i) => {
-      const c = headCount(h);
-      return `<tr>
-        ${i === 0 ? `<td rowspan="${tw.heads.length}"><b>${esc(tw.t || tw.tower_name)}</b></td>
-          <td rowspan="${tw.heads.length}">${esc(tw.scope)}</td>` : ''}
-        <td><b>${esc(h.n)}</b></td>
-        <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
-        ${i === 0 ? `<td rowspan="${tw.heads.length}">${(tw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
-          <td class="num" rowspan="${tw.heads.length}">${(tw.apps||[]).length}</td>` : ''}
-        <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
-      </tr>`;
-    }).join('')).join('');
+    tbody.innerHTML = TOWERS.map(tw => {
+      const heads = (tw.heads && tw.heads.length > 0) ? tw.heads : [{ n: '', a: '' }];
+      const rowSpan = heads.length;
+      return heads.map((h, i) => {
+        const c = headCount(h);
+        return `<tr>
+          ${i === 0 ? `<td rowspan="${rowSpan}"><b>${esc(tw.t || tw.tower_name)}</b></td>
+            <td rowspan="${rowSpan}">${esc(tw.scope)}</td>` : ''}
+          <td><b>${esc(h.n || '—')}</b></td>
+          <td>${h.a ? esc(h.a) : '<span style="color:#9AA1AC">Tower-wide</span>'}</td>
+          ${i === 0 ? `<td rowspan="${rowSpan}">${(tw.segs||[]).map(s => '<span class="tag loc" style="margin:1px 2px">' + esc(s) + '</span>').join('') || '&mdash;'}</td>
+            <td class="num" rowspan="${rowSpan}">${(tw.apps||[]).length}</td>` : ''}
+          <td class="num">${c === null ? '<span style="color:#9AA1AC">&mdash;</span>' : c}</td>
+        </tr>`;
+      }).join('');
+    }).join('');
   }
 
   /* Tower notes */
@@ -3845,18 +3869,64 @@ function renderTowers() {
   single-owner towers.</p>`;
 }
 
-async function saveMatrixBatch() {
+function syncDraftMatrixInputs() {
   if (!draftTowers) return;
   draftTowers.forEach((tw, twIdx) => {
     const scopeEl = document.getElementById('mat-scope-' + twIdx);
-    if (scopeEl) tw.scope = scopeEl.value.trim();
+    if (scopeEl) tw.scope = scopeEl.value;
     (tw.heads || []).forEach((h, hIdx) => {
       const nameEl = document.getElementById('mat-head-' + twIdx + '-' + hIdx);
       const areaEl = document.getElementById('mat-area-' + twIdx + '-' + hIdx);
-      if (nameEl) h.n = nameEl.value.trim();
-      if (areaEl) h.a = areaEl.value.trim();
+      if (nameEl) h.n = nameEl.value;
+      if (areaEl) h.a = areaEl.value;
     });
   });
+}
+
+function addMatrixHead(twIdx) {
+  syncDraftMatrixInputs();
+  if (!draftTowers || !draftTowers[twIdx]) return;
+  if (!Array.isArray(draftTowers[twIdx].heads)) draftTowers[twIdx].heads = [];
+  draftTowers[twIdx].heads.push({ n: '', a: '', segs: null });
+  renderTowers();
+}
+
+function removeMatrixHead(twIdx, hIdx) {
+  syncDraftMatrixInputs();
+  if (!draftTowers || !draftTowers[twIdx]) return;
+  const heads = draftTowers[twIdx].heads || [];
+  if (heads.length <= 1) {
+    toast('Each tower must have at least one head', 'err');
+    return;
+  }
+  heads.splice(hIdx, 1);
+  renderTowers();
+}
+
+window.addMatrixHead = addMatrixHead;
+window.removeMatrixHead = removeMatrixHead;
+window.syncDraftMatrixInputs = syncDraftMatrixInputs;
+
+async function saveMatrixBatch() {
+  syncDraftMatrixInputs();
+  if (!draftTowers) return;
+
+  for (let i = 0; i < draftTowers.length; i++) {
+    const tw = draftTowers[i];
+    tw.scope = (tw.scope || '').trim();
+    const tLabel = tw.t || tw.tower_name || ('Tower ' + (i + 1));
+    const heads = tw.heads || [];
+    for (let j = 0; j < heads.length; j++) {
+      heads[j].n = (heads[j].n || '').trim();
+      heads[j].a = (heads[j].a || '').trim();
+      if (!heads[j].n) {
+        toast(`Please enter a head name for ${tLabel} (row ${j + 1})`, 'err');
+        const errEl = document.getElementById(`mat-head-${i}-${j}`);
+        if (errEl) errEl.focus();
+        return;
+      }
+    }
+  }
 
   try {
     const updated = await apiFetch('/api/towers/batch', {
@@ -3873,6 +3943,7 @@ async function saveMatrixBatch() {
     toast('Failed to save ownership matrix: ' + e.message, 'err');
   }
 }
+window.saveMatrixBatch = saveMatrixBatch;
 
 /* ── Live Estate Initializer & Toolbar Wireup ────────── */
 async function initLiveEstateData() {
