@@ -5,10 +5,11 @@ const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
 
-const day1Routes   = require('./routes/day1');
-const appsRoutes   = require('./routes/apps');
-const teamRoutes   = require('./routes/team');
-const towersRoutes = require('./routes/towers');
+const day1Routes     = require('./routes/day1');
+const appsRoutes     = require('./routes/apps');
+const teamRoutes     = require('./routes/team');
+const towersRoutes   = require('./routes/towers');
+const activityRoutes = require('./routes/activity');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ app.use('/api/day1', day1Routes);
 app.use('/api/apps', appsRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/towers', towersRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Health-check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));

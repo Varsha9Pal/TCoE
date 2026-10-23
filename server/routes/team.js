@@ -6,6 +6,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
+const { logActivity } = require('../activityLogger');
 
 const ok  = (res, data)        => res.json({ ok: true, data });
 const err = (res, msg, status) => res.status(status || 500).json({ ok: false, error: msg });
@@ -69,7 +70,18 @@ router.post('/', (req, res) => {
     );
 
     const created = db.prepare('SELECT * FROM team_members WHERE id = ?').get(result.lastInsertRowid);
-    ok(res, formatTester(created));
+    const formatted = formatTester(created);
+
+    logActivity({
+      entity_type: 'team',
+      entity_id: created.id,
+      entity_name: created.resource_name,
+      action: 'CREATE',
+      summary: `Added team member "${created.resource_name}" (${created.current_vendor || 'No vendor'})`,
+      details: { snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[team] POST team:', e.message);
     err(res, 'Failed to create team member');
@@ -120,7 +132,27 @@ router.put('/:id', (req, res) => {
     }
 
     const updated = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
-    ok(res, formatTester(updated));
+    const formatted = formatTester(updated);
+
+    const changes = [];
+    if (current.resource_name !== resourceName) changes.push({ field: 'Resource Name', old: current.resource_name, new: resourceName });
+    if (current.current_vendor !== currentVendor) changes.push({ field: 'Vendor', old: current.current_vendor, new: currentVendor });
+    if (current.sdg_segment !== sdgSegment) changes.push({ field: 'Segment', old: current.sdg_segment, new: sdgSegment });
+    if (current.sdg_vertical !== sdgVertical) changes.push({ field: 'Vertical', old: current.sdg_vertical, new: sdgVertical });
+    if (current.vertical_head !== verticalHead) changes.push({ field: 'Vertical Head', old: current.vertical_head, new: verticalHead });
+    if (current.location !== location) changes.push({ field: 'Location', old: current.location, new: location });
+    if (current.system_name !== systemName) changes.push({ field: 'Platform', old: current.system_name, new: systemName });
+
+    logActivity({
+      entity_type: 'team',
+      entity_id: id,
+      entity_name: updated.resource_name,
+      action: 'UPDATE',
+      summary: `Updated team member "${updated.resource_name}"`,
+      details: { changes, snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[team] PUT team:', e.message);
     err(res, 'Failed to update team member');
@@ -131,9 +163,24 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
+    const current = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+    if (!current) return err(res, 'Team member not found', 404);
+
+    const snapshot = formatTester(current);
     const result = db.prepare('DELETE FROM team_members WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Team member not found', 404);
-    ok(res, { id });
+
+    logActivity({
+      entity_type: 'team',
+      entity_id: id,
+      entity_name: current.resource_name,
+      action: 'DELETE',
+      summary: `Deleted team member "${current.resource_name}" (${current.current_vendor || 'No vendor'})`,
+      details: { snapshot },
+      is_deleted: 1
+    });
+
+    ok(res, { id, name: current.resource_name });
   } catch (e) {
     console.error('[team] DELETE team:', e.message);
     err(res, 'Failed to delete team member');

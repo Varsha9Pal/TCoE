@@ -6,6 +6,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
+const { logActivity } = require('../activityLogger');
 
 /* ── helpers ─────────────────────────────────────────────────── */
 const ok  = (res, data)        => res.json({ ok: true, data });
@@ -182,7 +183,18 @@ router.post('/prerequisites', (req, res) => {
     );
 
     const created = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(result.lastInsertRowid);
-    ok(res, formatRow(created));
+    const formatted = formatRow(created);
+
+    logActivity({
+      entity_type: 'prerequisite',
+      entity_id: created.id,
+      entity_name: `${created.area} (#${created.sno})`,
+      action: 'CREATE',
+      summary: `Created prerequisite #${created.sno} (${created.area})`,
+      details: { snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[day1] POST prerequisites:', e.message);
     err(res, 'Failed to create prerequisite');
@@ -253,7 +265,23 @@ router.put('/prerequisites/:id', (req, res) => {
     }
 
     const updated = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
-    ok(res, formatRow(updated));
+    const formatted = formatRow(updated);
+
+    const changes = [];
+    if (current.area !== area) changes.push({ field: 'Area', old: current.area, new: area });
+    if (current.due !== due) changes.push({ field: 'Due', old: current.due, new: due });
+    if (current.status !== status) changes.push({ field: 'Status', old: current.status, new: status });
+
+    logActivity({
+      entity_type: 'prerequisite',
+      entity_id: id,
+      entity_name: `${updated.area} (#${updated.sno})`,
+      action: 'UPDATE',
+      summary: `Updated prerequisite #${updated.sno} (${updated.area})`,
+      details: { changes, snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[day1] PUT prerequisites:', e.message);
     err(res, 'Failed to update prerequisite');
@@ -264,9 +292,24 @@ router.put('/prerequisites/:id', (req, res) => {
 router.delete('/prerequisites/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
+    const current = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
+    if (!current) return err(res, 'Record not found', 404);
+
+    const snapshot = formatRow(current);
     const result = db.prepare('DELETE FROM d1_prerequisites WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Record not found', 404);
-    ok(res, { id });
+
+    logActivity({
+      entity_type: 'prerequisite',
+      entity_id: id,
+      entity_name: `${current.area} (#${current.sno})`,
+      action: 'DELETE',
+      summary: `Deleted prerequisite #${current.sno} (${current.area})`,
+      details: { snapshot },
+      is_deleted: 1
+    });
+
+    ok(res, { id, sno: current.sno });
   } catch (e) {
     console.error('[day1] DELETE prerequisites:', e.message);
     err(res, 'Failed to delete prerequisite');

@@ -325,6 +325,90 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   background: #6B0F28 !important;
 }
 
+/* Activity Log & Trash Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease;
+}
+.modal-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 8px;
+  width: 960px;
+  max-width: 96vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+  overflow: hidden;
+  border: 1px solid #D5DAE1;
+}
+.modal-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--maroon);
+  color: #fff;
+}
+.modal-card-header h3 {
+  margin: 0; font-size: 15px; font-weight: 600; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+}
+.modal-card-header .btn-close-modal {
+  background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; line-height: 1; opacity: .8;
+}
+.modal-card-header .btn-close-modal:hover { opacity: 1; }
+.modal-subnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.modal-tabs {
+  display: flex; gap: 6px;
+}
+.modal-tab-btn {
+  border: 1px solid #CBD5E1; background: #fff; color: var(--ink);
+  padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.modal-tab-btn.active {
+  background: var(--maroon); color: #fff; border-color: var(--maroon);
+}
+.modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  background: #FAFBFC;
+}
+.act-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.act-badge.create { background: #E6F4EA; color: #137333; border: 1px solid #CEEAD6; }
+.act-badge.update { background: #E8F0FE; color: #1A73E8; border: 1px solid #D2E3FC; }
+.act-badge.delete { background: #FCE8E6; color: #C5221F; border: 1px solid #FAD2CF; }
+.act-badge.restore { background: #F3E8FD; color: #8430CE; border: 1px solid #E9D2FD; }
+.act-diff-box {
+  margin-top: 5px; font-size: 11.5px; color: #475569;
+}
+.act-diff-tag {
+  display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid #CBD5E1; padding: 2px 6px; border-radius: 3px; margin: 2px 4px 2px 0;
+}
+.trash-restore-btn {
+  background: var(--maroon); color: #fff; border: none; padding: 4px 12px; border-radius: 3px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+}
+.trash-restore-btn:hover { background: #6B0F28; }
+
 /* inline edit row */
 .d1-edit-row td{background:#FDF6F8!important;padding:8px 10px!important;}
 .d1-edit-row input,.d1-edit-row select,.d1-edit-row textarea{
@@ -383,6 +467,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <button data-view="day1" class="">Day 1 Readiness <span class="navcount" id="nc-d1">30</span></button>
   <button data-view="m12" class="">12-Month Roadmap</button>
   <button data-view="arm" class="">Automation Roadmap</button>
+  <div style="margin-left:auto;display:flex;align-items:center;">
+    <button id="btn-open-activity" type="button" onclick="openActivityModal('all')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28);padding:5px 12px;border-radius:4px;font-weight:600;font-size:11.5px;cursor:pointer;line-height:1.2;margin:4px 0;" title="View Change History &amp; Restore Deleted Items">
+      <span>🕒</span> Activity &amp; Trash <span class="navcount" id="nc-trash" style="background:#fff;color:var(--maroon);display:none;font-weight:700;margin-left:4px;">0</span>
+    </button>
+  </div>
 </div></nav>
 
 <main><div class="wrap">
@@ -3190,7 +3279,7 @@ function fillSel(sel,label,vals){
 function uniq(arr,k){return [...new Set(arr.map(r=>r[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));}
 
 /* ---------- navigation ---------- */
-document.querySelectorAll('nav.mainnav button').forEach(b=>b.onclick=()=>{
+document.querySelectorAll('nav.mainnav button[data-view]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav.mainnav button').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');$('#view-'+b.dataset.view).classList.add('active');
@@ -3946,7 +4035,182 @@ async function saveMatrixBatch() {
 window.saveMatrixBatch = saveMatrixBatch;
 
 /* ── Live Estate Initializer & Toolbar Wireup ────────── */
+
+/* ── Activity History & Recycle Bin Controller ────────── */
+let currentActivityTab = 'all';
+let activityLogsData = [];
+let trashCountData = 0;
+
+async function updateTrashBadge() {
+  try {
+    const res = await apiFetch('/api/activity?type=trash');
+    if (res && typeof res.trashCount === 'number') {
+      trashCountData = res.trashCount;
+      const b1 = document.getElementById('nc-trash');
+      const b2 = document.getElementById('modal-nc-trash');
+      if (b1) {
+        b1.textContent = trashCountData;
+        b1.style.display = trashCountData > 0 ? 'inline-block' : 'none';
+      }
+      if (b2) {
+        b2.textContent = trashCountData;
+        b2.style.display = trashCountData > 0 ? 'inline-block' : 'none';
+      }
+    }
+  } catch (e) {
+    console.warn('[activity] Failed to fetch trash count:', e.message);
+  }
+}
+
+async function reloadActivityLogs() {
+  const container = document.getElementById('activity-modal-content');
+  if (container) container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Loading activity data...</div>';
+
+  const filterSel = document.getElementById('sel-activity-filter');
+  const entity = filterSel ? filterSel.value : 'all';
+
+  try {
+    const res = await apiFetch('/api/activity?type=' + currentActivityTab + '&entity=' + entity);
+    activityLogsData = res.data || [];
+    trashCountData = res.trashCount || 0;
+    updateTrashBadge();
+    renderActivityModalContent();
+  } catch (e) {
+    if (container) container.innerHTML = '<div style="text-align:center;padding:30px;color:#A3252A;">Failed to load logs: ' + esc(e.message) + '</div>';
+  }
+}
+
+function filterActivityLogs() {
+  renderActivityModalContent();
+}
+
+function renderActivityModalContent() {
+  const container = document.getElementById('activity-modal-content');
+  const countEl = document.getElementById('activity-log-count');
+  if (!container) return;
+
+  const searchInput = document.getElementById('input-activity-search');
+  const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+  let list = activityLogsData;
+  if (query) {
+    list = list.filter(item => {
+      const s = (item.summary || '') + ' ' + (item.entity_name || '') + ' ' + (item.entity_type || '');
+      return s.toLowerCase().includes(query);
+    });
+  }
+
+  if (countEl) {
+    countEl.textContent = currentActivityTab === 'trash'
+      ? ('Showing ' + list.length + ' deleted items in trash')
+      : ('Showing ' + list.length + ' recent activity entries');
+  }
+
+  if (list.length === 0) {
+    if (currentActivityTab === 'trash') {
+      container.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#64748B;"><div style="font-size:36px;margin-bottom:8px;">🗑️</div><div style="font-size:15px;font-weight:600;color:var(--ink);">Recycle Bin is empty</div><div style="font-size:12px;color:#94A3B8;margin-top:4px;">No deleted applications, team members, heads, or prerequisites.</div></div>';
+    } else {
+      container.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#64748B;"><div style="font-size:36px;margin-bottom:8px;">📋</div><div style="font-size:15px;font-weight:600;color:var(--ink);">No activity recorded yet</div><div style="font-size:12px;color:#94A3B8;margin-top:4px;">Changes, additions, and deletions will be tracked here.</div></div>';
+    }
+    return;
+  }
+
+  if (currentActivityTab === 'trash') {
+    container.innerHTML = '<table class="data" style="margin:0;background:#fff;border-radius:4px;overflow:hidden;"><thead><tr><th style="width:130px;">Deleted Time</th><th style="width:110px;">Entity</th><th>Item Name &amp; Details</th><th style="width:110px;text-align:center;">Action</th></tr></thead><tbody>' +
+      list.map(it => {
+        const dt = it.created_at ? new Date(it.created_at.replace(' ', 'T')).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+        const entityLabel = {
+          app: 'Application',
+          team: 'Team Member',
+          tower_head: 'Tower Head',
+          tower: 'Tower',
+          prerequisite: 'Prerequisite'
+        }[it.entity_type] || it.entity_type;
+
+        return '<tr>' +
+          '<td style="font-size:11.5px;color:#64748B;white-space:nowrap;">' + esc(dt) + '</td>' +
+          '<td><span class="tag loc" style="margin:0;font-size:11px;">' + esc(entityLabel) + '</span></td>' +
+          '<td><div style="font-weight:600;color:var(--ink);">' + esc(it.entity_name || it.summary) + '</div><div style="font-size:11px;color:#64748B;margin-top:2px;">' + esc(it.summary) + '</div></td>' +
+          '<td style="text-align:center;"><button type="button" class="trash-restore-btn" onclick="restoreTrashItem(' + it.id + ')" title="Restore this item">↺ Restore</button></td>' +
+          '</tr>';
+      }).join('') + '</tbody></table>';
+  } else {
+    container.innerHTML = '<table class="data" style="margin:0;background:#fff;border-radius:4px;overflow:hidden;"><thead><tr><th style="width:130px;">Time</th><th style="width:80px;text-align:center;">Action</th><th style="width:110px;">Entity</th><th>Summary &amp; Changes</th></tr></thead><tbody>' +
+      list.map(it => {
+        const dt = it.created_at ? new Date(it.created_at.replace(' ', 'T')).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+        const actClass = it.action ? it.action.toLowerCase() : 'update';
+        const entityLabel = {
+          app: 'Application',
+          team: 'Team Member',
+          tower_head: 'Tower Head',
+          tower: 'Tower Matrix',
+          prerequisite: 'Day 1 Prereq'
+        }[it.entity_type] || it.entity_type;
+
+        const changes = (it.details && it.details.changes) ? it.details.changes : [];
+
+        return '<tr>' +
+          '<td style="font-size:11.5px;color:#64748B;white-space:nowrap;">' + esc(dt) + '</td>' +
+          '<td style="text-align:center;"><span class="act-badge ' + actClass + '">' + esc(it.action) + '</span></td>' +
+          '<td><span class="tag loc" style="margin:0;font-size:11px;">' + esc(entityLabel) + '</span></td>' +
+          '<td><div style="font-weight:600;color:var(--ink);">' + esc(it.summary) + '</div>' +
+          (changes.length ? ('<div class="act-diff-box">' + changes.map(ch => '<span class="act-diff-tag"><b>' + esc(ch.field) + ':</b> <span style="text-decoration:line-through;color:#94A3B8;">' + esc(ch.old || '(empty)') + '</span> &rarr; <span style="color:#0F766E;font-weight:600;">' + esc(ch.new || '(empty)') + '</span></span>').join('') + '</div>') : '') +
+          '</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+}
+
+function switchActivityTab(tab) {
+  currentActivityTab = tab;
+  const bAct = document.getElementById('tab-btn-activity');
+  const bTrash = document.getElementById('tab-btn-trash');
+  if (bAct && bTrash) {
+    if (tab === 'trash') {
+      bAct.classList.remove('active');
+      bTrash.classList.add('active');
+    } else {
+      bAct.classList.add('active');
+      bTrash.classList.remove('active');
+    }
+  }
+  reloadActivityLogs();
+}
+
+function openActivityModal(tab) {
+  const modal = document.getElementById('modal-activity-overlay');
+  if (modal) {
+    modal.classList.add('open');
+    switchActivityTab(tab || 'all');
+  }
+}
+
+function closeActivityModal() {
+  const modal = document.getElementById('modal-activity-overlay');
+  if (modal) modal.classList.remove('open');
+}
+
+async function restoreTrashItem(id) {
+  try {
+    const res = await apiFetch('/api/activity/restore/' + id, { method: 'POST' });
+    toast(res.message || 'Item restored successfully!');
+    await initLiveEstateData();
+    if (typeof loadDay1 === 'function') loadDay1();
+    reloadActivityLogs();
+  } catch (e) {
+    toast('Failed to restore item: ' + e.message, 'err');
+  }
+}
+
+window.openActivityModal = openActivityModal;
+window.closeActivityModal = closeActivityModal;
+window.switchActivityTab = switchActivityTab;
+window.restoreTrashItem = restoreTrashItem;
+window.reloadActivityLogs = reloadActivityLogs;
+window.filterActivityLogs = filterActivityLogs;
+window.updateTrashBadge = updateTrashBadge;
+
 async function initLiveEstateData() {
+  updateTrashBadge();
   try {
     const [appsRes, teamRes, towersRes] = await Promise.all([
       apiFetch('/api/apps'),
@@ -5085,5 +5349,44 @@ async function loadD1(){
 $('#gen').textContent='Generated '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
 </script>
 
+
+
+<!-- ===================== ACTIVITY & TRASH MODAL ===================== -->
+<div id="modal-activity-overlay" class="modal-overlay" onclick="if(event.target===this)closeActivityModal()">
+  <div class="modal-card">
+    <div class="modal-card-header">
+      <h3><span>🕒</span> Change History &amp; Recycle Bin</h3>
+      <button type="button" class="btn-close-modal" onclick="closeActivityModal()" title="Close">&times;</button>
+    </div>
+    <div class="modal-subnav">
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab-btn active" id="tab-btn-activity" onclick="switchActivityTab('all')">
+          📋 Activity History
+        </button>
+        <button type="button" class="modal-tab-btn" id="tab-btn-trash" onclick="switchActivityTab('trash')">
+          🗑️ Recycle Bin (Trash) <span class="navcount" id="modal-nc-trash" style="background:#A3252A;color:#fff;font-weight:700;display:none;">0</span>
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <select id="sel-activity-filter" onchange="reloadActivityLogs()" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid #CBD5E1;">
+          <option value="all">All Entity Types</option>
+          <option value="app">Applications</option>
+          <option value="team">Team Members</option>
+          <option value="tower">Tower Heads &amp; Matrix</option>
+          <option value="prerequisite">Day 1 Prerequisites</option>
+        </select>
+        <input type="text" id="input-activity-search" placeholder="Search logs..." oninput="filterActivityLogs()" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid #CBD5E1;width:150px;">
+        <button type="button" class="btn" onclick="reloadActivityLogs()" style="font-size:11px;padding:4px 8px;background:#fff;border:1px solid #CBD5E1;cursor:pointer;" title="Refresh logs">🔄 Refresh</button>
+      </div>
+    </div>
+    <div class="modal-body" id="activity-modal-content">
+      <!-- Injected dynamically -->
+    </div>
+    <div class="modal-footer" style="padding:10px 20px;background:#fff;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+      <span id="activity-log-count" style="font-size:12px;color:#64748B;">Loading history...</span>
+      <button type="button" class="btn" onclick="closeActivityModal()" style="font-size:12px;padding:4px 14px;">Close</button>
+    </div>
+  </div>
+</div>
 
 </body></html>

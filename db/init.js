@@ -98,6 +98,22 @@ module.exports = function initDb(db) {
     );
   `);
 
+  /* ── 5. ACTIVITY LOG & RECYCLE BIN TABLE ────────────────── */
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS activity_log (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      entity_type  TEXT NOT NULL,
+      entity_id    TEXT NOT NULL DEFAULT '',
+      entity_name  TEXT NOT NULL DEFAULT '',
+      action       TEXT NOT NULL,
+      summary      TEXT NOT NULL,
+      details_json TEXT NOT NULL DEFAULT '{}',
+      is_deleted   INTEGER NOT NULL DEFAULT 0,
+      is_restored  INTEGER NOT NULL DEFAULT 0,
+      created_at   TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
   /* ── SEED PREREQUISITES ──────────────────────────────────── */
   const prereqCount = db.prepare('SELECT COUNT(*) AS n FROM d1_prerequisites').get().n;
   if (prereqCount === 0) {

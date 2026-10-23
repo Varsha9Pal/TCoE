@@ -6,6 +6,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
+const { logActivity } = require('../activityLogger');
 
 const ok  = (res, data)        => res.json({ ok: true, data });
 const err = (res, msg, status) => res.status(status || 500).json({ ok: false, error: msg });
@@ -71,7 +72,18 @@ router.post('/', (req, res) => {
     );
 
     const created = db.prepare('SELECT * FROM app_list WHERE id = ?').get(result.lastInsertRowid);
-    ok(res, formatApp(created));
+    const formatted = formatApp(created);
+
+    logActivity({
+      entity_type: 'app',
+      entity_id: created.id,
+      entity_name: created.system_name,
+      action: 'CREATE',
+      summary: `Created application "${created.system_name}" (${created.tower || 'No tower'})`,
+      details: { snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[apps] POST apps:', e.message);
     err(res, 'Failed to create application');
@@ -123,7 +135,28 @@ router.put('/:id', (req, res) => {
     }
 
     const updated = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
-    ok(res, formatApp(updated));
+    const formatted = formatApp(updated);
+
+    const changes = [];
+    if (current.tower !== tower) changes.push({ field: 'Tower', old: current.tower, new: tower });
+    if (current.module !== moduleName) changes.push({ field: 'Module', old: current.module, new: moduleName });
+    if (current.system_name !== systemName) changes.push({ field: 'System Name', old: current.system_name, new: systemName });
+    if (current.business_usage !== businessUsage) changes.push({ field: 'Business usage', old: current.business_usage, new: businessUsage });
+    if (current.app_type !== appType) changes.push({ field: 'Application Type', old: current.app_type, new: appType });
+    if (current.technology !== technology) changes.push({ field: 'Technology', old: current.technology, new: technology });
+    if (current.has_api !== hasApi) changes.push({ field: 'Has API', old: current.has_api, new: hasApi });
+    if (current.monthly_cr !== monthlyCr) changes.push({ field: 'Monthly CR', old: current.monthly_cr, new: monthlyCr });
+
+    logActivity({
+      entity_type: 'app',
+      entity_id: id,
+      entity_name: updated.system_name,
+      action: 'UPDATE',
+      summary: `Updated application "${updated.system_name}"`,
+      details: { changes, snapshot: formatted }
+    });
+
+    ok(res, formatted);
   } catch (e) {
     console.error('[apps] PUT apps:', e.message);
     err(res, 'Failed to update application');
@@ -134,9 +167,24 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
+    const current = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    if (!current) return err(res, 'Application not found', 404);
+
+    const snapshot = formatApp(current);
     const result = db.prepare('DELETE FROM app_list WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Application not found', 404);
-    ok(res, { id });
+
+    logActivity({
+      entity_type: 'app',
+      entity_id: id,
+      entity_name: current.system_name,
+      action: 'DELETE',
+      summary: `Deleted application "${current.system_name}" (${current.tower || 'No tower'})`,
+      details: { snapshot },
+      is_deleted: 1
+    });
+
+    ok(res, { id, name: current.system_name });
   } catch (e) {
     console.error('[apps] DELETE apps:', e.message);
     err(res, 'Failed to delete application');
