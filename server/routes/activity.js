@@ -56,8 +56,10 @@ router.get('/', (req, res) => {
     const rows = db.prepare(query).all(...params);
     res.json({
       ok: true,
-      data: rows.map(formatLog),
-      trashCount
+      data: {
+        items: rows.map(formatLog),
+        trashCount
+      }
     });
   } catch (e) {
     console.error('[activity] GET error:', e.message);

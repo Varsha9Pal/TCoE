@@ -3483,6 +3483,7 @@ window.saveAppEdit = async function(id) {
     appEditingId = null;
     toast('Application updated successfully');
     refreshEstateStats();
+    updateTrashBadge();
     renderApps();
   } catch (e) {
     if (e.status === 409) {
@@ -3515,6 +3516,7 @@ window.deleteApp = async function(id) {
 
     toast('Application deleted');
     refreshEstateStats();
+    updateTrashBadge();
     renderApps();
   } catch (e) {
     toast('Failed to delete: ' + e.message, 'err');
@@ -3691,6 +3693,7 @@ window.saveTeamEdit = async function(id) {
     teamEditingId = null;
     toast('Team member updated successfully');
     refreshEstateStats();
+    updateTrashBadge();
     renderTeam();
   } catch (e) {
     if (e.status === 409) {
@@ -3723,6 +3726,7 @@ window.deleteTeam = async function(id) {
 
     toast('Team member deleted');
     refreshEstateStats();
+    updateTrashBadge();
     renderTeam();
   } catch (e) {
     toast('Failed to delete: ' + e.message, 'err');
@@ -4027,6 +4031,7 @@ async function saveMatrixBatch() {
     draftTowers = null;
     toast('Ownership matrix updated successfully');
     refreshEstateStats();
+    updateTrashBadge();
     renderTowers();
   } catch (e) {
     toast('Failed to save ownership matrix: ' + e.message, 'err');
@@ -4044,18 +4049,22 @@ let trashCountData = 0;
 async function updateTrashBadge() {
   try {
     const res = await apiFetch('/api/activity?type=trash');
-    if (res && typeof res.trashCount === 'number') {
-      trashCountData = res.trashCount;
-      const b1 = document.getElementById('nc-trash');
-      const b2 = document.getElementById('modal-nc-trash');
-      if (b1) {
-        b1.textContent = trashCountData;
-        b1.style.display = trashCountData > 0 ? 'inline-block' : 'none';
-      }
-      if (b2) {
-        b2.textContent = trashCountData;
-        b2.style.display = trashCountData > 0 ? 'inline-block' : 'none';
-      }
+    const count = (res && typeof res.trashCount === 'number')
+      ? res.trashCount
+      : (res && Array.isArray(res.items))
+        ? res.items.length
+        : Array.isArray(res) ? res.length : 0;
+
+    trashCountData = count;
+    const b1 = document.getElementById('nc-trash');
+    const b2 = document.getElementById('modal-nc-trash');
+    if (b1) {
+      b1.textContent = trashCountData;
+      b1.style.display = trashCountData > 0 ? 'inline-block' : 'none';
+    }
+    if (b2) {
+      b2.textContent = trashCountData;
+      b2.style.display = trashCountData > 0 ? 'inline-block' : 'none';
     }
   } catch (e) {
     console.warn('[activity] Failed to fetch trash count:', e.message);
@@ -4071,8 +4080,16 @@ async function reloadActivityLogs() {
 
   try {
     const res = await apiFetch('/api/activity?type=' + currentActivityTab + '&entity=' + entity);
-    activityLogsData = res.data || [];
-    trashCountData = res.trashCount || 0;
+    if (res && Array.isArray(res.items)) {
+      activityLogsData = res.items;
+      if (typeof res.trashCount === 'number') trashCountData = res.trashCount;
+    } else if (Array.isArray(res)) {
+      activityLogsData = res;
+    } else if (res && Array.isArray(res.data)) {
+      activityLogsData = res.data;
+    } else {
+      activityLogsData = [];
+    }
     updateTrashBadge();
     renderActivityModalContent();
   } catch (e) {
@@ -4901,6 +4918,7 @@ window.d1SaveEdit = async function(id){
     renderSummary();
     updateFilters();
     toast('Prerequisite saved', 'ok');
+    if (window.updateTrashBadge) updateTrashBadge();
   } catch(err) {
     if(err.status === 409){
       toast('Update conflict: refreshing latest data', 'err');
@@ -4925,6 +4943,7 @@ window.d1Delete = async function(id){
     renderSummary();
     updateFilters();
     toast('Prerequisite deleted', 'ok');
+    if (window.updateTrashBadge) updateTrashBadge();
   } catch(err) {
     toast(err.message || 'Delete failed', 'err');
   }
