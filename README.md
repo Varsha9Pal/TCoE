@@ -11,11 +11,16 @@ Just **double-click** the file:
 ```
 start.bat
 ```
-It will automatically:
-1. Verify Node.js is installed.
-2. Install required packages (if running for the first time).
-3. Start the server on `http://localhost:3000`.
-4. Automatically open your default web browser to the dashboard.
+
+### On macOS:
+1. Open **Terminal** and navigate to this folder.
+2. Run:
+   ```bash
+   npm install
+   npm start
+   ```
+   *(Or double-click `start.command`)*
+3. Your browser will open to `http://localhost:3000`.
 
 ---
 
