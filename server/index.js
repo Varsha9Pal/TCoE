@@ -35,7 +35,15 @@ app.use('/api/towers',   towersRoutes);
 app.use('/api/activity', activityRoutes);
 
 // Health-check
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+app.get('/api/health', (_req, res) => {
+  const isTurso = Boolean(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN);
+  res.json({
+    status: 'ok',
+    database_mode: isTurso ? 'Turso Cloud (Persistent)' : 'Local SQLite (Temporary Ephemeral)',
+    turso_url_configured: Boolean(process.env.TURSO_DATABASE_URL),
+    time: new Date().toISOString()
+  });
+});
 
 // ── 404 for unknown API paths ─────────────────────────────────
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
