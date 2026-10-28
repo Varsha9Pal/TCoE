@@ -10,6 +10,27 @@ const { logActivity } = require('../activityLogger');
 const ok  = (res, data)        => res.json({ ok: true, data });
 const err = (res, msg, status) => res.status(status || 500).json({ ok: false, error: msg });
 
+function toIstDisplay(raw) {
+  if (!raw) return '—';
+  let str = String(raw).trim();
+  // If no timezone offset, assume UTC from server / SQLite
+  if (!str.includes('Z') && !/[+-]\d{2}:?\d{2}$/.test(str)) {
+    str = str.replace(' ', 'T') + 'Z';
+  } else {
+    str = str.replace(' ', 'T');
+  }
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+}
+
 function formatLog(r) {
   let details = {};
   try { details = JSON.parse(r.details_json); } catch (_) {}
@@ -17,7 +38,7 @@ function formatLog(r) {
     id: r.id, entity_type: r.entity_type, entity_id: r.entity_id,
     entity_name: r.entity_name, action: r.action, summary: r.summary,
     details, is_deleted: Boolean(r.is_deleted), is_restored: Boolean(r.is_restored),
-    created_at: r.created_at
+    created_at: toIstDisplay(r.created_at)
   };
 }
 
