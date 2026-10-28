@@ -3224,8 +3224,10 @@ async function apiFetch(path, opts={}){
   return (j && j.data !== undefined) ? j.data : j;
 }
 
-let T = (DATA.testers || []).map((t, i) => ({ id: t.id || i + 1, ...t, version: t.version || 0 }));
-let A = (DATA.apps || []).map((a, i) => ({ id: a.id || i + 1, ...a, version: a.version || 0 }));
+/* T and A start empty — always loaded fresh from the API in initLiveEstateData().
+   The hardcoded DATA object is kept only as a fallback if the server is unreachable. */
+let T = [];
+let A = [];
 
 let TOWERS = [
  {id: 1, t:'Tower 1', tower_name:'Tower 1', scope:'Liabilities, Wealth & CRM', vert:'Liabilities, Wealth & CRM', vertical:'Liabilities, Wealth & CRM',
@@ -4234,11 +4236,15 @@ async function initLiveEstateData() {
       apiFetch('/api/team'),
       apiFetch('/api/towers')
     ]);
-    if (Array.isArray(appsRes) && appsRes.length) A = appsRes;
-    if (Array.isArray(teamRes) && teamRes.length) T = teamRes;
+    // Always use API data — this is the source of truth (saved in DB)
+    if (Array.isArray(appsRes)) A = appsRes;
+    if (Array.isArray(teamRes)) T = teamRes;
     if (Array.isArray(towersRes) && towersRes.length) TOWERS = towersRes;
   } catch (e) {
-    console.warn('[estate] Backend API unreachable, keeping fallback seed:', e.message);
+    // Server unreachable — fall back to hardcoded DATA so UI still works
+    console.warn('[estate] Backend API unreachable, using hardcoded fallback data:', e.message);
+    if (!A.length) A = (DATA.apps    || []).map((a, i) => ({ id: a.id || i + 1, ...a, version: a.version || 0 }));
+    if (!T.length) T = (DATA.testers || []).map((t, i) => ({ id: t.id || i + 1, ...t, version: t.version || 0 }));
   }
   refreshEstateStats();
   renderApps();
@@ -4537,11 +4543,7 @@ function wireTeamToolbar() {
 /* Initialize all listeners and load live data */
 wireAppsToolbar();
 wireTeamToolbar();
-refreshEstateStats();
-renderApps();
-renderTeam();
-renderTowers();
-initLiveEstateData();
+initLiveEstateData(); /* fetches fresh data from DB, then renders */
 
 /* ---------- Day 1 readiness — live from API ---------- */
 (function(){

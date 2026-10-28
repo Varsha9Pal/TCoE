@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tcoe-engagement
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 22.0.0
+      - key: DB_PATH
+        value: /data/tcoe.db
+    disk:
+      name: tcoe-data
+      mountPath: /data
+      sizeGB: 1
