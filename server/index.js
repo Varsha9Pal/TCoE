@@ -14,7 +14,7 @@ const activityRoutes = require('./routes/activity');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Middleware ────────────────────────────────────────────────────────────────
+// ── Middleware ────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -27,20 +27,20 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'TCoE Engagement.html'));
 });
 
-// ── API routes ────────────────────────────────────────────────────────────────
-app.use('/api/day1', day1Routes);
-app.use('/api/apps', appsRoutes);
-app.use('/api/team', teamRoutes);
-app.use('/api/towers', towersRoutes);
+// ── API routes ────────────────────────────────────────────────
+app.use('/api/day1',     day1Routes);
+app.use('/api/apps',     appsRoutes);
+app.use('/api/team',     teamRoutes);
+app.use('/api/towers',   towersRoutes);
 app.use('/api/activity', activityRoutes);
 
 // Health-check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-// ── 404 for unknown API paths ─────────────────────────────────────────────────
+// ── 404 for unknown API paths ─────────────────────────────────
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
-// ── Global error handler ──────────────────────────────────────────────────────
+// ── Global error handler ──────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error('[error]', err.message);
@@ -48,24 +48,35 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: err.message || 'Internal server error' });
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-function startServer(port) {
-  const server = app.listen(port, '0.0.0.0', () => {
-    console.log(`[server] TCoE Engagement running on http://localhost:${port}`);
-    console.log(`[server] Open http://localhost:${port} in your browser`);
-  });
+// ── Start ─────────────────────────────────────────────────────
+async function main() {
+  // Initialise DB schema + seed (async for Turso)
+  const db = require('./db');
+  await require('../db/init')(db);
 
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      const nextPort = Number(port) + 1;
-      console.warn(`[server] Port ${port} is in use. Trying port ${nextPort}...`);
-      startServer(nextPort);
-    } else {
-      console.error('[server] Server error:', err.message);
-    }
-  });
+  function startServer(port) {
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`[server] TCoE Engagement running on http://localhost:${port}`);
+      console.log(`[server] Open http://localhost:${port} in your browser`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        const nextPort = Number(port) + 1;
+        console.warn(`[server] Port ${port} is in use. Trying port ${nextPort}...`);
+        startServer(nextPort);
+      } else {
+        console.error('[server] Server error:', err.message);
+      }
+    });
+  }
+
+  startServer(PORT);
 }
 
-startServer(PORT);
+main().catch(e => {
+  console.error('[startup] Fatal error:', e.message);
+  process.exit(1);
+});
 
 module.exports = app;

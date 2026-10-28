@@ -1,10 +1,11 @@
 'use strict';
 /**
  * activityLogger.js — Central helper for tracking modifications and deleted snapshots.
+ * Now async-compatible for Turso/libSQL.
  */
 const db = require('./db');
 
-function logActivity({
+async function logActivity({
   entity_type,
   entity_id,
   entity_name,
@@ -14,12 +15,11 @@ function logActivity({
   is_deleted = 0
 }) {
   try {
-    const stmt = db.prepare(`
+    await db.prepare(`
       INSERT INTO activity_log (
         entity_type, entity_id, entity_name, action, summary, details_json, is_deleted, is_restored
       ) VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-    `);
-    stmt.run(
+    `).run(
       String(entity_type || 'system'),
       String(entity_id || ''),
       String(entity_name || ''),

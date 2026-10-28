@@ -1,16 +1,18 @@
 'use strict';
 /**
- * init.js — SQLite database initialization and seeding for all tabs:
+ * init.js — SQLite / Turso database initialization and seeding for all tabs:
  * 1. Day 1 Readiness (d1_prerequisites, d1_mobilisation, d1_observations)
  * 2. Applications (app_list)
  * 3. Team (team_members)
  * 4. Towers (tower_config)
+ * 5. Activity Log & Recycle Bin (activity_log)
+ *
+ * Async compatible with Turso / libSQL and local SQLite.
  */
-const path = require('path');
 
-module.exports = function initDb(db) {
+module.exports = async function initDb(db) {
   /* ── 1. DAY 1 READINESS TABLES ───────────────────────────── */
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS d1_prerequisites (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       sno         INTEGER NOT NULL DEFAULT 0,
@@ -49,43 +51,43 @@ module.exports = function initDb(db) {
   `);
 
   /* ── 2. APPLICATION LIST TABLE ───────────────────────────── */
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS app_list (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      tower         TEXT NOT NULL DEFAULT '',
-      module        TEXT NOT NULL DEFAULT '',
-      system_name   TEXT NOT NULL DEFAULT '',
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      tower          TEXT NOT NULL DEFAULT '',
+      module         TEXT NOT NULL DEFAULT '',
+      system_name    TEXT NOT NULL DEFAULT '',
       business_usage TEXT NOT NULL DEFAULT '',
-      app_type      TEXT NOT NULL DEFAULT '',
-      technology    TEXT NOT NULL DEFAULT '',
-      has_api       TEXT NOT NULL DEFAULT 'No',
-      monthly_cr    INTEGER NOT NULL DEFAULT 0,
-      version       INTEGER NOT NULL DEFAULT 0,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+      app_type       TEXT NOT NULL DEFAULT '',
+      technology     TEXT NOT NULL DEFAULT '',
+      has_api        TEXT NOT NULL DEFAULT 'No',
+      monthly_cr     INTEGER NOT NULL DEFAULT 0,
+      version        INTEGER NOT NULL DEFAULT 0,
+      created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
 
   /* ── 3. TEAM MEMBERS TABLE ───────────────────────────────── */
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS team_members (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      sr_no         INTEGER NOT NULL DEFAULT 0,
-      resource_name TEXT NOT NULL DEFAULT '',
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      sr_no          INTEGER NOT NULL DEFAULT 0,
+      resource_name  TEXT NOT NULL DEFAULT '',
       current_vendor TEXT NOT NULL DEFAULT '',
-      sdg_segment   TEXT NOT NULL DEFAULT '',
-      sdg_vertical  TEXT NOT NULL DEFAULT '',
-      vertical_head TEXT NOT NULL DEFAULT '',
-      location      TEXT NOT NULL DEFAULT '',
-      system_name   TEXT NOT NULL DEFAULT '',
-      version       INTEGER NOT NULL DEFAULT 0,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+      sdg_segment    TEXT NOT NULL DEFAULT '',
+      sdg_vertical   TEXT NOT NULL DEFAULT '',
+      vertical_head  TEXT NOT NULL DEFAULT '',
+      location       TEXT NOT NULL DEFAULT '',
+      system_name    TEXT NOT NULL DEFAULT '',
+      version        INTEGER NOT NULL DEFAULT 0,
+      created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
 
   /* ── 4. TOWER CONFIG TABLE ───────────────────────────────── */
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS tower_config (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       tower_key   TEXT NOT NULL UNIQUE,
@@ -99,7 +101,7 @@ module.exports = function initDb(db) {
   `);
 
   /* ── 5. ACTIVITY LOG & RECYCLE BIN TABLE ────────────────── */
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS activity_log (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       entity_type  TEXT NOT NULL,
@@ -115,7 +117,8 @@ module.exports = function initDb(db) {
   `);
 
   /* ── SEED PREREQUISITES ──────────────────────────────────── */
-  const prereqCount = db.prepare('SELECT COUNT(*) AS n FROM d1_prerequisites').get().n;
+  const prereqRow = await db.prepare('SELECT COUNT(*) AS n FROM d1_prerequisites').get();
+  const prereqCount = prereqRow ? Number(prereqRow.n) : 0;
   if (prereqCount === 0) {
     try {
       const originalItems = require('./original_day1.json');
@@ -123,30 +126,27 @@ module.exports = function initDb(db) {
         INSERT INTO d1_prerequisites
           (sno, area, description, details, bank, qk, due, status, note, due_display, due_month, state, owner, ord, search_text)
         VALUES
-          (@sno, @area, @description, @details, @bank, @qk, @due, @status, @note, @due_display, @due_month, @state, @owner, @ord, @search_text)
+          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
-      const insertPrereqs = db.transaction((items) => {
-        for (const it of items) {
-          insPre.run({
-            sno: it.sno,
-            area: it.Area,
-            description: JSON.stringify(it.Description || []),
-            details: JSON.stringify(it.Details || []),
-            bank: JSON.stringify(it.Bank || []),
-            qk: JSON.stringify(it.QK || []),
-            due: it.Due || '',
-            status: it.Status || 'Not set',
-            note: it.Note || '',
-            due_display: it._due || it.Due || '',
-            due_month: it._month || 'Not dated',
-            state: it._state || it.Status || 'Not set',
-            owner: it._owner || 'Joint / unassigned',
-            ord: it._ord || 0,
-            search_text: it._search || ''
-          });
-        }
-      });
-      insertPrereqs(originalItems);
+      for (const it of originalItems) {
+        await insPre.run(
+          it.sno,
+          it.Area,
+          JSON.stringify(it.Description || []),
+          JSON.stringify(it.Details || []),
+          JSON.stringify(it.Bank || []),
+          JSON.stringify(it.QK || []),
+          it.Due || '',
+          it.Status || 'Not set',
+          it.Note || '',
+          it._due || it.Due || '',
+          it._month || 'Not dated',
+          it._state || it.Status || 'Not set',
+          it._owner || 'Joint / unassigned',
+          it._ord || 0,
+          it._search || ''
+        );
+      }
       console.log('[db] ✓ Seeded', originalItems.length, 'prerequisites');
     } catch(e) {
       console.warn('[db] Prerequisites seed warning:', e.message);
@@ -154,7 +154,8 @@ module.exports = function initDb(db) {
   }
 
   /* ── SEED MOBILISATION ───────────────────────────────────── */
-  const mobCount = db.prepare('SELECT COUNT(*) AS n FROM d1_mobilisation').get().n;
+  const mobRow = await db.prepare('SELECT COUNT(*) AS n FROM d1_mobilisation').get();
+  const mobCount = mobRow ? Number(mobRow.n) : 0;
   if (mobCount === 0) {
     const insMob = db.prepare(`
       INSERT INTO d1_mobilisation (id, item_label, day1_value, full_ramp_value)
@@ -169,12 +170,13 @@ module.exports = function initDb(db) {
       [6, 'Power BI licences', '—', '2 developer'],
       [7, 'Staff in transition scope', '110 existing (27 already QK)', 'Head-count under revision']
     ];
-    for (const m of mobRows) insMob.run(...m);
+    for (const m of mobRows) await insMob.run(...m);
     console.log('[db] ✓ Seeded 7 mobilisation rows');
   }
 
   /* ── SEED OBSERVATIONS ───────────────────────────────────── */
-  const obsCount = db.prepare('SELECT COUNT(*) AS n FROM d1_observations').get().n;
+  const obsRow = await db.prepare('SELECT COUNT(*) AS n FROM d1_observations').get();
+  const obsCount = obsRow ? Number(obsRow.n) : 0;
   if (obsCount === 0) {
     const obsHtml = `<p><b>More falls due after go-live than before it.</b> 16 of the 30 prerequisites are dated November 2026 or later, against 10 in October. Items such as application access, tool licences and the AI/LLM approval are dated 1 November &mdash; the same day the team starts &mdash; which leaves no float if any of them slips. Pulling the access and licence items into October would de-risk the first week materially.</p>
 <p><b>4 items are already past due</b> as at 22 October: LOI, KT / Transition, Automation, Governance. The LOI in particular gates the 1 November start, and the KT plan drives the transition of the existing team.</p>
@@ -182,12 +184,13 @@ module.exports = function initDb(db) {
 <p><b>Ownership is thin on the page.</b> 16 of the 30 rows name neither a Bank nor a QK action, so accountability has to be inferred from the area. Adding a named owner per line &mdash; rather than per column &mdash; would make the tracker usable in the daily core-group sync proposed under item 25.</p>
 <p><b>Head-count still moving.</b> Item 11 revises the figure from 110 towards a new tower-wise number, and item 12 puts 27 of the 110 already with QK. The Current State Team tab in this page lists 115 testers, so the three figures (110, 115 and the revised number) need to be reconciled before the PO and licence counts of 135 are locked.</p>
 <p><b>Tooling.</b> 3 tool items are tracked &mdash; TestSigma and JIRA at 135 licences each and Power BI at 2 &mdash; and the licence count of 135 matches the month-3 laptop number rather than the 115 testers in the current-state sheet, implying planned growth that should be confirmed in the SOW.</p>`;
-    db.prepare(`INSERT INTO d1_observations (id, content) VALUES (1, ?)`).run(obsHtml);
+    await db.prepare(`INSERT INTO d1_observations (id, content) VALUES (1, ?)`).run(obsHtml);
     console.log('[db] ✓ Seeded observations');
   }
 
   /* ── SEED APPLICATIONS ───────────────────────────────────── */
-  const appCount = db.prepare('SELECT COUNT(*) AS n FROM app_list').get().n;
+  const appRow = await db.prepare('SELECT COUNT(*) AS n FROM app_list').get();
+  const appCount = appRow ? Number(appRow.n) : 0;
   if (appCount === 0) {
     try {
       const apps = require('./original_apps.json');
@@ -195,23 +198,20 @@ module.exports = function initDb(db) {
         INSERT INTO app_list
           (tower, module, system_name, business_usage, app_type, technology, has_api, monthly_cr)
         VALUES
-          (@tower, @module, @system_name, @business_usage, @app_type, @technology, @has_api, @monthly_cr)
+          (?, ?, ?, ?, ?, ?, ?, ?)
       `);
-      const insertApps = db.transaction((rows) => {
-        for (const a of rows) {
-          insApp.run({
-            tower: a.Tower || '',
-            module: a.Module || '',
-            system_name: a['System Name'] || '',
-            business_usage: a['Business usage'] || '',
-            app_type: a['Application Type'] || '',
-            technology: a['Technology Used'] || '',
-            has_api: a['Has API'] || a._api || 'No',
-            monthly_cr: parseInt(a['Approx. Monthly CR Count'] || a._cr || 0, 10) || 0
-          });
-        }
-      });
-      insertApps(apps);
+      for (const a of apps) {
+        await insApp.run(
+          a.Tower || '',
+          a.Module || '',
+          a['System Name'] || '',
+          a['Business usage'] || '',
+          a['Application Type'] || '',
+          a['Technology Used'] || '',
+          a['Has API'] || a._api || 'No',
+          parseInt(a['Approx. Monthly CR Count'] || a._cr || 0, 10) || 0
+        );
+      }
       console.log('[db] ✓ Seeded', apps.length, 'applications into app_list');
     } catch(e) {
       console.warn('[db] Applications seed warning:', e.message);
@@ -219,7 +219,8 @@ module.exports = function initDb(db) {
   }
 
   /* ── SEED TEAM MEMBERS ───────────────────────────────────── */
-  const teamCount = db.prepare('SELECT COUNT(*) AS n FROM team_members').get().n;
+  const teamRow = await db.prepare('SELECT COUNT(*) AS n FROM team_members').get();
+  const teamCount = teamRow ? Number(teamRow.n) : 0;
   if (teamCount === 0) {
     try {
       const testers = require('./original_testers.json');
@@ -227,23 +228,20 @@ module.exports = function initDb(db) {
         INSERT INTO team_members
           (sr_no, resource_name, current_vendor, sdg_segment, sdg_vertical, vertical_head, location, system_name)
         VALUES
-          (@sr_no, @resource_name, @current_vendor, @sdg_segment, @sdg_vertical, @vertical_head, @location, @system_name)
+          (?, ?, ?, ?, ?, ?, ?, ?)
       `);
-      const insertTeam = db.transaction((rows) => {
-        for (const t of rows) {
-          insTeam.run({
-            sr_no: t['Sr No'] || 0,
-            resource_name: t['Resource Name'] || '',
-            current_vendor: t['Current Vendor'] || '',
-            sdg_segment: t['SDG Segment'] || '',
-            sdg_vertical: t['SDG Vertical'] || '',
-            vertical_head: t['SDG Vertical Head'] || '',
-            location: t.Location || '',
-            system_name: t['System / Platform Name'] || t._platform || ''
-          });
-        }
-      });
-      insertTeam(testers);
+      for (const t of testers) {
+        await insTeam.run(
+          t['Sr No'] || 0,
+          t['Resource Name'] || '',
+          t['Current Vendor'] || '',
+          t['SDG Segment'] || '',
+          t['SDG Vertical'] || '',
+          t['SDG Vertical Head'] || '',
+          t.Location || '',
+          t['System / Platform Name'] || t._platform || ''
+        );
+      }
       console.log('[db] ✓ Seeded', testers.length, 'testers into team_members');
     } catch(e) {
       console.warn('[db] Team members seed warning:', e.message);
@@ -251,11 +249,12 @@ module.exports = function initDb(db) {
   }
 
   /* ── SEED TOWER CONFIG ───────────────────────────────────── */
-  const towerCount = db.prepare('SELECT COUNT(*) AS n FROM tower_config').get().n;
+  const towerConfigRow = await db.prepare('SELECT COUNT(*) AS n FROM tower_config').get();
+  const towerCount = towerConfigRow ? Number(towerConfigRow.n) : 0;
   if (towerCount === 0) {
     const insTow = db.prepare(`
       INSERT INTO tower_config (tower_key, tower_name, scope, vertical, heads_json)
-      VALUES (@tower_key, @tower_name, @scope, @vertical, @heads_json)
+      VALUES (?, ?, ?, ?, ?)
     `);
     const initialTowers = [
       {
@@ -309,10 +308,9 @@ module.exports = function initDb(db) {
       }
     ];
 
-    const insertTowers = db.transaction((rows) => {
-      for (const r of rows) insTow.run(r);
-    });
-    insertTowers(initialTowers);
+    for (const r of initialTowers) {
+      await insTow.run(r.tower_key, r.tower_name, r.scope, r.vertical, r.heads_json);
+    }
     console.log('[db] ✓ Seeded 5 towers into tower_config');
   }
 };

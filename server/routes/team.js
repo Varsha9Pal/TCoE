@@ -36,9 +36,9 @@ function formatTester(r) {
 }
 
 /* GET /api/team */
-router.get('/', (_req, res) => {
+router.get('/', async (_req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM team_members ORDER BY sr_no, id').all();
+    const rows = await db.prepare('SELECT * FROM team_members ORDER BY sr_no, id').all();
     ok(res, rows.map(formatTester));
   } catch (e) {
     console.error('[team] GET team:', e.message);
@@ -47,7 +47,7 @@ router.get('/', (_req, res) => {
 });
 
 /* POST /api/team */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const resourceName  = (req.body['Resource Name'] || req.body.resource_name || '').trim();
   const currentVendor = (req.body['Current Vendor'] || req.body.current_vendor || '').trim();
   const sdgSegment    = (req.body['SDG Segment'] || req.body.sdg_segment || '').trim();
@@ -59,17 +59,17 @@ router.post('/', (req, res) => {
   if (!resourceName) return err(res, 'Resource name is required', 400);
 
   try {
-    const maxSr = db.prepare('SELECT COALESCE(MAX(sr_no),0) AS m FROM team_members').get().m;
-    const result = db.prepare(`
+    const maxRow = await db.prepare('SELECT COALESCE(MAX(sr_no),0) AS m FROM team_members').get();
+    const maxSr  = maxRow ? Number(maxRow.m) : 0;
+
+    const result = await db.prepare(`
       INSERT INTO team_members
         (sr_no, resource_name, current_vendor, sdg_segment, sdg_vertical, vertical_head, location, system_name)
       VALUES
         (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      maxSr + 1, resourceName, currentVendor, sdgSegment, sdgVertical, verticalHead, location, systemName
-    );
+    `).run(maxSr + 1, resourceName, currentVendor, sdgSegment, sdgVertical, verticalHead, location, systemName);
 
-    const created = db.prepare('SELECT * FROM team_members WHERE id = ?').get(result.lastInsertRowid);
+    const created = await db.prepare('SELECT * FROM team_members WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatTester(created);
 
     logActivity({
@@ -89,7 +89,7 @@ router.post('/', (req, res) => {
 });
 
 /* PUT /api/team/:id */
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { version } = req.body;
 
@@ -105,7 +105,7 @@ router.put('/:id', (req, res) => {
   if (version === undefined || version === null) return err(res, 'version is required', 400);
 
   try {
-    const current = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
     if (!current) return err(res, 'Team member not found', 404);
 
     if (current.version !== Number(version)) {
@@ -116,22 +116,20 @@ router.put('/:id', (req, res) => {
       });
     }
 
-    const result = db.prepare(`
+    const result = await db.prepare(`
       UPDATE team_members SET
         resource_name = ?, current_vendor = ?, sdg_segment = ?, sdg_vertical = ?,
         vertical_head = ?, location = ?, system_name = ?,
         version = version + 1,
         updated_at = datetime('now')
       WHERE id = ? AND version = ?
-    `).run(
-      resourceName, currentVendor, sdgSegment, sdgVertical, verticalHead, location, systemName, id, Number(version)
-    );
+    `).run(resourceName, currentVendor, sdgSegment, sdgVertical, verticalHead, location, systemName, id, Number(version));
 
     if (result.changes === 0) {
       return res.status(409).json({ ok: false, error: 'Concurrent update conflict — please refresh.' });
     }
 
-    const updated = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+    const updated = await db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
     const formatted = formatTester(updated);
 
     const changes = [];
@@ -160,14 +158,14 @@ router.put('/:id', (req, res) => {
 });
 
 /* DELETE /api/team/:id */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    const current = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
     if (!current) return err(res, 'Team member not found', 404);
 
     const snapshot = formatTester(current);
-    const result = db.prepare('DELETE FROM team_members WHERE id = ?').run(id);
+    const result = await db.prepare('DELETE FROM team_members WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Team member not found', 404);
 
     logActivity({

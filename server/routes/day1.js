@@ -1,7 +1,6 @@
 'use strict';
 /**
- * day1.js — REST API routes for Day 1 Readiness.
- * Uses better-sqlite3 with optimistic concurrency locking and full prototype compatibility.
+ * day1.js — REST API routes for Day 1 Readiness. (async/await for Turso)
  */
 const express = require('express');
 const router  = express.Router();
@@ -27,56 +26,35 @@ function computeMeta(area, desc, det, bnk, qkArr, dueVal, statusVal, noteVal) {
   const status = statusVal || 'Not set';
   const due    = (dueVal || '').trim();
 
-  // 1. _state
   let state = status;
   if (status === 'Planned') {
     if (due && due !== 'TBD') {
       const d = new Date(due + 'T00:00:00Z');
-      if (!isNaN(d) && d < new Date('2026-10-22T00:00:00Z')) {
-        state = 'Overdue';
-      }
+      if (!isNaN(d) && d < new Date('2026-10-22T00:00:00Z')) state = 'Overdue';
     }
   }
 
-  // 2. _month
   let month = 'Not dated';
   if (due && due !== 'TBD') {
     const d = new Date(due + 'T00:00:00Z');
-    if (!isNaN(d)) {
-      month = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-    }
+    if (!isNaN(d)) month = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   }
 
-  // 3. _due (display)
   let dueDisplay = due || '—';
   if (due === 'TBD') {
     dueDisplay = 'TBD';
   } else if (due) {
     const d = new Date(due + 'T00:00:00Z');
-    if (!isNaN(d)) {
-      dueDisplay = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
-    }
+    if (!isNaN(d)) dueDisplay = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
   }
 
-  // 4. _owner
   let owner = 'Joint / unassigned';
   if (bnk.length && qkArr.length) owner = 'Bank + QK';
   else if (bnk.length) owner = 'Bank';
   else if (qkArr.length) owner = 'QK';
 
-  // 5. _search
-  const search = [
-    area,
-    ...desc,
-    ...det,
-    ...bnk,
-    ...qkArr,
-    state,
-    dueDisplay,
-    owner
-  ].join(' ').toLowerCase();
+  const search = [area, ...desc, ...det, ...bnk, ...qkArr, state, dueDisplay, owner].join(' ').toLowerCase();
 
-  // 6. _ord
   let ord = 10000000;
   if (due && due !== 'TBD') {
     const d = new Date(due + 'T00:00:00Z');
@@ -87,53 +65,35 @@ function computeMeta(area, desc, det, bnk, qkArr, dueVal, statusVal, noteVal) {
 }
 
 function formatRow(r) {
-  const desc = parseJson(r.description);
-  const det  = parseJson(r.details);
-  const bnk  = parseJson(r.bank);
-  const qkArr= parseJson(r.qk);
-
+  const desc  = parseJson(r.description);
+  const det   = parseJson(r.details);
+  const bnk   = parseJson(r.bank);
+  const qkArr = parseJson(r.qk);
   return {
-    id:          r.id,
-    sno:         r.sno,
-    Area:        r.area,
-    area:        r.area,
-    Description: desc,
-    description: desc,
-    Details:     det,
-    details:     det,
-    Bank:        bnk,
-    bank:        bnk,
-    QK:          qkArr,
-    qk:          qkArr,
-    Due:         r.due,
-    due:         r.due,
-    due_date:    r.due,
-    Status:      r.status,
-    status:      r.status,
-    note:        r.note || '',
-    Note:        r.note || '',
-    _due:        r.due_display,
-    due_display: r.due_display,
-    _month:      r.due_month,
-    due_month:   r.due_month,
-    _state:      r.state,
-    state:       r.state,
-    _owner:      r.owner,
-    owner:       r.owner,
-    _ord:        r.ord,
-    _search:     r.search_text,
-    version:     r.version
+    id: r.id, sno: r.sno,
+    Area: r.area, area: r.area,
+    Description: desc, description: desc,
+    Details: det, details: det,
+    Bank: bnk, bank: bnk,
+    QK: qkArr, qk: qkArr,
+    Due: r.due, due: r.due, due_date: r.due,
+    Status: r.status, status: r.status,
+    note: r.note || '', Note: r.note || '',
+    _due: r.due_display, due_display: r.due_display,
+    _month: r.due_month, due_month: r.due_month,
+    _state: r.state, state: r.state,
+    _owner: r.owner, owner: r.owner,
+    _ord: r.ord, _search: r.search_text,
+    version: r.version
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   PREREQUISITES
-═══════════════════════════════════════════════════════════════ */
+/* ═══ PREREQUISITES ═══════════════════════════════════════════ */
 
 /* GET /api/day1/prerequisites */
-router.get('/prerequisites', (_req, res) => {
+router.get('/prerequisites', async (_req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM d1_prerequisites ORDER BY sno, id').all();
+    const rows = await db.prepare('SELECT * FROM d1_prerequisites ORDER BY sno, id').all();
     ok(res, rows.map(formatRow));
   } catch (e) {
     console.error('[day1] GET prerequisites:', e.message);
@@ -142,54 +102,40 @@ router.get('/prerequisites', (_req, res) => {
 });
 
 /* POST /api/day1/prerequisites */
-router.post('/prerequisites', (req, res) => {
-  const area = (req.body.area || req.body.Area || '').trim();
-  const desc = Array.isArray(req.body.description) ? req.body.description : parseJson(req.body.description);
-  const det  = Array.isArray(req.body.details)     ? req.body.details     : parseJson(req.body.details);
-  const bnk  = Array.isArray(req.body.bank)        ? req.body.bank        : parseJson(req.body.bank);
-  const qkArr= Array.isArray(req.body.qk)          ? req.body.qk          : parseJson(req.body.qk);
-  const due  = (req.body.due || req.body.due_date || '').trim();
+router.post('/prerequisites', async (req, res) => {
+  const area   = (req.body.area || req.body.Area || '').trim();
+  const desc   = Array.isArray(req.body.description) ? req.body.description : parseJson(req.body.description);
+  const det    = Array.isArray(req.body.details)     ? req.body.details     : parseJson(req.body.details);
+  const bnk    = Array.isArray(req.body.bank)        ? req.body.bank        : parseJson(req.body.bank);
+  const qkArr  = Array.isArray(req.body.qk)          ? req.body.qk          : parseJson(req.body.qk);
+  const due    = (req.body.due || req.body.due_date || '').trim();
   const status = req.body.status || req.body.state || req.body.Status || 'Not set';
-  const note = (req.body.note || '').trim();
+  const note   = (req.body.note || '').trim();
 
   if (!area) return err(res, 'Area is required', 400);
   if (!desc.length) return err(res, 'Description is required', 400);
 
   try {
-    const maxSno = db.prepare('SELECT COALESCE(MAX(sno),0) AS m FROM d1_prerequisites').get().m;
-    const meta = computeMeta(area, desc, det, bnk, qkArr, due, status, note);
+    const maxRow = await db.prepare('SELECT COALESCE(MAX(sno),0) AS m FROM d1_prerequisites').get();
+    const maxSno = maxRow ? Number(maxRow.m) : 0;
+    const meta   = computeMeta(area, desc, det, bnk, qkArr, due, status, note);
 
-    const result = db.prepare(`
+    const result = await db.prepare(`
       INSERT INTO d1_prerequisites
         (sno, area, description, details, bank, qk, due, status, note, due_display, due_month, state, owner, ord, search_text)
-      VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      maxSno + 1,
-      area,
-      JSON.stringify(desc),
-      JSON.stringify(det),
-      JSON.stringify(bnk),
-      JSON.stringify(qkArr),
-      due,
-      status,
-      note,
-      meta.dueDisplay,
-      meta.month,
-      meta.state,
-      meta.owner,
-      meta.ord,
-      meta.search
+      maxSno + 1, area,
+      JSON.stringify(desc), JSON.stringify(det), JSON.stringify(bnk), JSON.stringify(qkArr),
+      due, status, note, meta.dueDisplay, meta.month, meta.state, meta.owner, meta.ord, meta.search
     );
 
-    const created = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(result.lastInsertRowid);
+    const created   = await db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatRow(created);
 
     logActivity({
-      entity_type: 'prerequisite',
-      entity_id: created.id,
-      entity_name: `${created.area} (#${created.sno})`,
-      action: 'CREATE',
+      entity_type: 'prerequisite', entity_id: created.id,
+      entity_name: `${created.area} (#${created.sno})`, action: 'CREATE',
       summary: `Created prerequisite #${created.sno} (${created.area})`,
       details: { snapshot: formatted }
     });
@@ -201,82 +147,59 @@ router.post('/prerequisites', (req, res) => {
   }
 });
 
-/* PUT /api/day1/prerequisites/:id (optimistic locking) */
-router.put('/prerequisites/:id', (req, res) => {
+/* PUT /api/day1/prerequisites/:id */
+router.put('/prerequisites/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { version } = req.body;
 
-  const area = (req.body.area || req.body.Area || '').trim();
-  const desc = Array.isArray(req.body.description) ? req.body.description : parseJson(req.body.description);
-  const det  = Array.isArray(req.body.details)     ? req.body.details     : parseJson(req.body.details);
-  const bnk  = Array.isArray(req.body.bank)        ? req.body.bank        : parseJson(req.body.bank);
-  const qkArr= Array.isArray(req.body.qk)          ? req.body.qk          : parseJson(req.body.qk);
-  const due  = (req.body.due || req.body.due_date || '').trim();
+  const area   = (req.body.area || req.body.Area || '').trim();
+  const desc   = Array.isArray(req.body.description) ? req.body.description : parseJson(req.body.description);
+  const det    = Array.isArray(req.body.details)     ? req.body.details     : parseJson(req.body.details);
+  const bnk    = Array.isArray(req.body.bank)        ? req.body.bank        : parseJson(req.body.bank);
+  const qkArr  = Array.isArray(req.body.qk)          ? req.body.qk          : parseJson(req.body.qk);
+  const due    = (req.body.due || req.body.due_date || '').trim();
   const status = req.body.status || req.body.state || req.body.Status || 'Not set';
-  const note = (req.body.note || '').trim();
+  const note   = (req.body.note || '').trim();
 
   if (!area) return err(res, 'Area is required', 400);
   if (!desc.length) return err(res, 'Description is required', 400);
   if (version === undefined || version === null) return err(res, 'version is required', 400);
 
   try {
-    const current = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
     if (!current) return err(res, 'Record not found', 404);
 
     if (current.version !== Number(version)) {
-      return res.status(409).json({
-        ok: false,
-        error: 'This record was modified by another user. Reloading latest data...',
-        serverVersion: current.version
-      });
+      return res.status(409).json({ ok: false, error: 'This record was modified by another user.', serverVersion: current.version });
     }
 
-    const meta = computeMeta(area, desc, det, bnk, qkArr, due, status, note);
-
-    const result = db.prepare(`
+    const meta   = computeMeta(area, desc, det, bnk, qkArr, due, status, note);
+    const result = await db.prepare(`
       UPDATE d1_prerequisites SET
         area = ?, description = ?, details = ?, bank = ?, qk = ?,
         due = ?, status = ?, note = ?,
         due_display = ?, due_month = ?, state = ?, owner = ?, ord = ?, search_text = ?,
-        version = version + 1,
-        updated_at = datetime('now')
+        version = version + 1, updated_at = datetime('now')
       WHERE id = ? AND version = ?
     `).run(
-      area,
-      JSON.stringify(desc),
-      JSON.stringify(det),
-      JSON.stringify(bnk),
-      JSON.stringify(qkArr),
-      due,
-      status,
-      note,
-      meta.dueDisplay,
-      meta.month,
-      meta.state,
-      meta.owner,
-      meta.ord,
-      meta.search,
-      id,
-      Number(version)
+      area, JSON.stringify(desc), JSON.stringify(det), JSON.stringify(bnk), JSON.stringify(qkArr),
+      due, status, note, meta.dueDisplay, meta.month, meta.state, meta.owner, meta.ord, meta.search,
+      id, Number(version)
     );
 
-    if (result.changes === 0) {
-      return res.status(409).json({ ok: false, error: 'Concurrent update conflict — please refresh.' });
-    }
+    if (result.changes === 0) return res.status(409).json({ ok: false, error: 'Concurrent update conflict — please refresh.' });
 
-    const updated = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
+    const updated   = await db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
     const formatted = formatRow(updated);
 
     const changes = [];
     if (current.area !== area) changes.push({ field: 'Area', old: current.area, new: area });
-    if (current.due !== due) changes.push({ field: 'Due', old: current.due, new: due });
+    if (current.due  !== due)  changes.push({ field: 'Due',  old: current.due,  new: due  });
     if (current.status !== status) changes.push({ field: 'Status', old: current.status, new: status });
 
     logActivity({
-      entity_type: 'prerequisite',
-      entity_id: id,
-      entity_name: `${updated.area} (#${updated.sno})`,
-      action: 'UPDATE',
+      entity_type: 'prerequisite', entity_id: id,
+      entity_name: `${updated.area} (#${updated.sno})`, action: 'UPDATE',
       summary: `Updated prerequisite #${updated.sno} (${updated.area})`,
       details: { changes, snapshot: formatted }
     });
@@ -289,24 +212,21 @@ router.put('/prerequisites/:id', (req, res) => {
 });
 
 /* DELETE /api/day1/prerequisites/:id */
-router.delete('/prerequisites/:id', (req, res) => {
+router.delete('/prerequisites/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    const current = db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(id);
     if (!current) return err(res, 'Record not found', 404);
 
     const snapshot = formatRow(current);
-    const result = db.prepare('DELETE FROM d1_prerequisites WHERE id = ?').run(id);
+    const result   = await db.prepare('DELETE FROM d1_prerequisites WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Record not found', 404);
 
     logActivity({
-      entity_type: 'prerequisite',
-      entity_id: id,
-      entity_name: `${current.area} (#${current.sno})`,
-      action: 'DELETE',
+      entity_type: 'prerequisite', entity_id: id,
+      entity_name: `${current.area} (#${current.sno})`, action: 'DELETE',
       summary: `Deleted prerequisite #${current.sno} (${current.area})`,
-      details: { snapshot },
-      is_deleted: 1
+      details: { snapshot }, is_deleted: 1
     });
 
     ok(res, { id, sno: current.sno });
@@ -316,14 +236,12 @@ router.delete('/prerequisites/:id', (req, res) => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   MOBILISATION
-═══════════════════════════════════════════════════════════════ */
+/* ═══ MOBILISATION ════════════════════════════════════════════ */
 
 /* GET /api/day1/mobilisation */
-router.get('/mobilisation', (_req, res) => {
+router.get('/mobilisation', async (_req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM d1_mobilisation ORDER BY id').all();
+    const rows = await db.prepare('SELECT * FROM d1_mobilisation ORDER BY id').all();
     ok(res, rows);
   } catch (e) {
     console.error('[day1] GET mobilisation:', e.message);
@@ -331,26 +249,20 @@ router.get('/mobilisation', (_req, res) => {
   }
 });
 
-/* PUT /api/day1/mobilisation/batch — update all rows at once */
-router.put('/mobilisation/batch', (req, res) => {
+/* PUT /api/day1/mobilisation/batch */
+router.put('/mobilisation/batch', async (req, res) => {
   const { rows } = req.body;
   if (!Array.isArray(rows)) return err(res, 'rows array is required', 400);
 
   try {
-    const upd = db.prepare(`
-      UPDATE d1_mobilisation SET
-        item_label = ?, day1_value = ?, full_ramp_value = ?, updated_at = datetime('now')
-      WHERE id = ?
-    `);
-
-    const updateAll = db.transaction((list) => {
-      for (const r of list) {
-        upd.run((r.item_label || '').trim(), (r.day1_value || '').trim(), (r.full_ramp_value || '').trim(), r.id);
-      }
-    });
-
-    updateAll(rows);
-    const updated = db.prepare('SELECT * FROM d1_mobilisation ORDER BY id').all();
+    for (const r of rows) {
+      await db.prepare(`
+        UPDATE d1_mobilisation SET
+          item_label = ?, day1_value = ?, full_ramp_value = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).run((r.item_label || '').trim(), (r.day1_value || '').trim(), (r.full_ramp_value || '').trim(), r.id);
+    }
+    const updated = await db.prepare('SELECT * FROM d1_mobilisation ORDER BY id').all();
     ok(res, updated);
   } catch (e) {
     console.error('[day1] PUT mobilisation batch:', e.message);
@@ -358,12 +270,12 @@ router.put('/mobilisation/batch', (req, res) => {
   }
 });
 
-/* PUT /api/day1/mobilisation/:id — update single row */
-router.put('/mobilisation/:id', (req, res) => {
+/* PUT /api/day1/mobilisation/:id */
+router.put('/mobilisation/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { item_label, day1_value, full_ramp_value } = req.body;
   try {
-    const result = db.prepare(`
+    const result = await db.prepare(`
       UPDATE d1_mobilisation SET
         item_label = COALESCE(?, item_label),
         day1_value = ?, full_ramp_value = ?, updated_at = datetime('now')
@@ -375,7 +287,7 @@ router.put('/mobilisation/:id', (req, res) => {
       id
     );
     if (result.changes === 0) return err(res, 'Record not found', 404);
-    const updated = db.prepare('SELECT * FROM d1_mobilisation WHERE id = ?').get(id);
+    const updated = await db.prepare('SELECT * FROM d1_mobilisation WHERE id = ?').get(id);
     ok(res, updated);
   } catch (e) {
     console.error('[day1] PUT mobilisation:', e.message);
@@ -383,14 +295,12 @@ router.put('/mobilisation/:id', (req, res) => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   OBSERVATIONS
-═══════════════════════════════════════════════════════════════ */
+/* ═══ OBSERVATIONS ════════════════════════════════════════════ */
 
 /* GET /api/day1/observations */
-router.get('/observations', (_req, res) => {
+router.get('/observations', async (_req, res) => {
   try {
-    const row = db.prepare('SELECT * FROM d1_observations ORDER BY id LIMIT 1').get();
+    const row     = await db.prepare('SELECT * FROM d1_observations ORDER BY id LIMIT 1').get();
     const content = (row && row.content) || '';
     ok(res, { id: (row && row.id) || null, content, body_html: content });
   } catch (e) {
@@ -400,17 +310,17 @@ router.get('/observations', (_req, res) => {
 });
 
 /* PUT /api/day1/observations */
-router.put('/observations', (req, res) => {
+router.put('/observations', async (req, res) => {
   const content = req.body.content !== undefined ? req.body.content : (req.body.body_html || '');
   try {
-    const existing = db.prepare('SELECT id FROM d1_observations ORDER BY id LIMIT 1').get();
+    const existing = await db.prepare('SELECT id FROM d1_observations ORDER BY id LIMIT 1').get();
     if (existing) {
-      db.prepare(`UPDATE d1_observations SET content = ?, updated_at = datetime('now') WHERE id = ?`)
+      await db.prepare(`UPDATE d1_observations SET content = ?, updated_at = datetime('now') WHERE id = ?`)
         .run((content || '').trim(), existing.id);
     } else {
-      db.prepare(`INSERT INTO d1_observations (content) VALUES (?)`).run((content || '').trim());
+      await db.prepare(`INSERT INTO d1_observations (content) VALUES (?)`).run((content || '').trim());
     }
-    const updated = db.prepare('SELECT * FROM d1_observations ORDER BY id LIMIT 1').get();
+    const updated = await db.prepare('SELECT * FROM d1_observations ORDER BY id LIMIT 1').get();
     ok(res, { id: updated.id, content: updated.content, body_html: updated.content });
   } catch (e) {
     console.error('[day1] PUT observations:', e.message);

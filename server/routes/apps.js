@@ -38,9 +38,9 @@ function formatApp(r) {
 }
 
 /* GET /api/apps */
-router.get('/', (_req, res) => {
+router.get('/', async (_req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM app_list ORDER BY id').all();
+    const rows = await db.prepare('SELECT * FROM app_list ORDER BY id').all();
     ok(res, rows.map(formatApp));
   } catch (e) {
     console.error('[apps] GET apps:', e.message);
@@ -49,7 +49,7 @@ router.get('/', (_req, res) => {
 });
 
 /* POST /api/apps */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const tower          = (req.body.Tower || req.body.tower || '').trim();
   const moduleName     = (req.body.Module || req.body.module || '').trim();
   const systemName     = (req.body['System Name'] || req.body.system_name || '').trim();
@@ -62,16 +62,14 @@ router.post('/', (req, res) => {
   if (!systemName) return err(res, 'System name is required', 400);
 
   try {
-    const result = db.prepare(`
+    const result = await db.prepare(`
       INSERT INTO app_list
         (tower, module, system_name, business_usage, app_type, technology, has_api, monthly_cr)
       VALUES
         (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr
-    );
+    `).run(tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr);
 
-    const created = db.prepare('SELECT * FROM app_list WHERE id = ?').get(result.lastInsertRowid);
+    const created = await db.prepare('SELECT * FROM app_list WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatApp(created);
 
     logActivity({
@@ -91,7 +89,7 @@ router.post('/', (req, res) => {
 });
 
 /* PUT /api/apps/:id */
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { version } = req.body;
 
@@ -108,7 +106,7 @@ router.put('/:id', (req, res) => {
   if (version === undefined || version === null) return err(res, 'version is required', 400);
 
   try {
-    const current = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
     if (!current) return err(res, 'Application not found', 404);
 
     if (current.version !== Number(version)) {
@@ -119,22 +117,20 @@ router.put('/:id', (req, res) => {
       });
     }
 
-    const result = db.prepare(`
+    const result = await db.prepare(`
       UPDATE app_list SET
         tower = ?, module = ?, system_name = ?, business_usage = ?,
         app_type = ?, technology = ?, has_api = ?, monthly_cr = ?,
         version = version + 1,
         updated_at = datetime('now')
       WHERE id = ? AND version = ?
-    `).run(
-      tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr, id, Number(version)
-    );
+    `).run(tower, moduleName, systemName, businessUsage, appType, technology, hasApi, monthlyCr, id, Number(version));
 
     if (result.changes === 0) {
       return res.status(409).json({ ok: false, error: 'Concurrent update conflict — please refresh.' });
     }
 
-    const updated = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    const updated = await db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
     const formatted = formatApp(updated);
 
     const changes = [];
@@ -164,14 +160,14 @@ router.put('/:id', (req, res) => {
 });
 
 /* DELETE /api/apps/:id */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    const current = db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
+    const current = await db.prepare('SELECT * FROM app_list WHERE id = ?').get(id);
     if (!current) return err(res, 'Application not found', 404);
 
     const snapshot = formatApp(current);
-    const result = db.prepare('DELETE FROM app_list WHERE id = ?').run(id);
+    const result = await db.prepare('DELETE FROM app_list WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Application not found', 404);
 
     logActivity({
