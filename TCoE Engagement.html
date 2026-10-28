@@ -4103,6 +4103,24 @@ function filterActivityLogs() {
   renderActivityModalContent();
 }
 
+function formatActivityTime(raw) {
+  if (!raw) return '—';
+  // Ensure UTC date parsing if timezone offset is not explicitly provided
+  let str = String(raw).trim().replace(' ', 'T');
+  if (!str.endsWith('Z') && !str.includes('+') && !str.includes('-')) {
+    str += 'Z';
+  }
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+}
+
 function renderActivityModalContent() {
   const container = document.getElementById('activity-modal-content');
   const countEl = document.getElementById('activity-log-count');
@@ -4137,7 +4155,7 @@ function renderActivityModalContent() {
   if (currentActivityTab === 'trash') {
     container.innerHTML = '<table class="data" style="margin:0;background:#fff;border-radius:4px;overflow:hidden;"><thead><tr><th style="width:130px;">Deleted Time</th><th style="width:110px;">Entity</th><th>Item Name &amp; Details</th><th style="width:110px;text-align:center;">Action</th></tr></thead><tbody>' +
       list.map(it => {
-        const dt = it.created_at ? new Date(it.created_at.replace(' ', 'T')).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+        const dt = formatActivityTime(it.created_at);
         const entityLabel = {
           app: 'Application',
           team: 'Team Member',
@@ -4156,7 +4174,7 @@ function renderActivityModalContent() {
   } else {
     container.innerHTML = '<table class="data" style="margin:0;background:#fff;border-radius:4px;overflow:hidden;"><thead><tr><th style="width:130px;">Time</th><th style="width:80px;text-align:center;">Action</th><th style="width:110px;">Entity</th><th>Summary &amp; Changes</th></tr></thead><tbody>' +
       list.map(it => {
-        const dt = it.created_at ? new Date(it.created_at.replace(' ', 'T')).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+        const dt = formatActivityTime(it.created_at);
         const actClass = it.action ? it.action.toLowerCase() : 'update';
         const entityLabel = {
           app: 'Application',
