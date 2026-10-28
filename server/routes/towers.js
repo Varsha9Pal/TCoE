@@ -63,7 +63,7 @@ router.put('/batch', async (req, res) => {
         for (const ph of prevHeads) {
           const stillExists = newHeads.some(nh => (nh.n || '').trim() === (ph.n || '').trim() && (nh.a || '').trim() === (ph.a || '').trim());
           if (!stillExists && ph.n) {
-            logActivity({
+            await logActivity({
               entity_type: 'tower_head', entity_id: t.id,
               entity_name: `${ph.n} (${t.tower_name || t.t || 'Tower ' + t.id})`,
               action: 'DELETE',
@@ -77,7 +77,7 @@ router.put('/batch', async (req, res) => {
         for (const nh of newHeads) {
           const wasThere = prevHeads.some(ph => (ph.n || '').trim() === (nh.n || '').trim() && (ph.a || '').trim() === (nh.a || '').trim());
           if (!wasThere && nh.n) {
-            logActivity({
+            await logActivity({
               entity_type: 'tower_head', entity_id: t.id,
               entity_name: `${nh.n} (${t.tower_name || t.t || 'Tower ' + t.id})`,
               action: 'CREATE',
@@ -88,7 +88,7 @@ router.put('/batch', async (req, res) => {
         }
 
         if ((prev.scope || '').trim() !== (t.scope || '').trim()) {
-          logActivity({
+          await logActivity({
             entity_type: 'tower', entity_id: t.id,
             entity_name: t.tower_name || t.t || 'Tower ' + t.id,
             action: 'UPDATE',

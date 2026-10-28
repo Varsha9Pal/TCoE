@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
     const created = await db.prepare('SELECT * FROM team_members WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatTester(created);
 
-    logActivity({
+    await logActivity({
       entity_type: 'team',
       entity_id: created.id,
       entity_name: created.resource_name,
@@ -141,7 +141,7 @@ router.put('/:id', async (req, res) => {
     if (current.location !== location) changes.push({ field: 'Location', old: current.location, new: location });
     if (current.system_name !== systemName) changes.push({ field: 'Platform', old: current.system_name, new: systemName });
 
-    logActivity({
+    await logActivity({
       entity_type: 'team',
       entity_id: id,
       entity_name: updated.resource_name,
@@ -168,7 +168,7 @@ router.delete('/:id', async (req, res) => {
     const result = await db.prepare('DELETE FROM team_members WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Team member not found', 404);
 
-    logActivity({
+    await logActivity({
       entity_type: 'team',
       entity_id: id,
       entity_name: current.resource_name,

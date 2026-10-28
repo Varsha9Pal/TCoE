@@ -133,7 +133,7 @@ router.post('/prerequisites', async (req, res) => {
     const created   = await db.prepare('SELECT * FROM d1_prerequisites WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatRow(created);
 
-    logActivity({
+    await logActivity({
       entity_type: 'prerequisite', entity_id: created.id,
       entity_name: `${created.area} (#${created.sno})`, action: 'CREATE',
       summary: `Created prerequisite #${created.sno} (${created.area})`,
@@ -197,7 +197,7 @@ router.put('/prerequisites/:id', async (req, res) => {
     if (current.due  !== due)  changes.push({ field: 'Due',  old: current.due,  new: due  });
     if (current.status !== status) changes.push({ field: 'Status', old: current.status, new: status });
 
-    logActivity({
+    await logActivity({
       entity_type: 'prerequisite', entity_id: id,
       entity_name: `${updated.area} (#${updated.sno})`, action: 'UPDATE',
       summary: `Updated prerequisite #${updated.sno} (${updated.area})`,
@@ -222,7 +222,7 @@ router.delete('/prerequisites/:id', async (req, res) => {
     const result   = await db.prepare('DELETE FROM d1_prerequisites WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Record not found', 404);
 
-    logActivity({
+    await logActivity({
       entity_type: 'prerequisite', entity_id: id,
       entity_name: `${current.area} (#${current.sno})`, action: 'DELETE',
       summary: `Deleted prerequisite #${current.sno} (${current.area})`,

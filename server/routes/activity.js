@@ -130,7 +130,7 @@ router.post('/restore/:id', async (req, res) => {
 
     await db.prepare('UPDATE activity_log SET is_restored = 1 WHERE id = ?').run(id);
 
-    logActivity({
+    await logActivity({
       entity_type: log.entity_type, entity_id: log.entity_id, entity_name: log.entity_name,
       action: 'RESTORE',
       summary: `Restored ${log.entity_type}: ${log.entity_name}`,

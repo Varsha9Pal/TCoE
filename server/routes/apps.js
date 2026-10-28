@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
     const created = await db.prepare('SELECT * FROM app_list WHERE id = ?').get(result.lastInsertRowid);
     const formatted = formatApp(created);
 
-    logActivity({
+    await logActivity({
       entity_type: 'app',
       entity_id: created.id,
       entity_name: created.system_name,
@@ -143,7 +143,7 @@ router.put('/:id', async (req, res) => {
     if (current.has_api !== hasApi) changes.push({ field: 'Has API', old: current.has_api, new: hasApi });
     if (current.monthly_cr !== monthlyCr) changes.push({ field: 'Monthly CR', old: current.monthly_cr, new: monthlyCr });
 
-    logActivity({
+    await logActivity({
       entity_type: 'app',
       entity_id: id,
       entity_name: updated.system_name,
@@ -170,7 +170,7 @@ router.delete('/:id', async (req, res) => {
     const result = await db.prepare('DELETE FROM app_list WHERE id = ?').run(id);
     if (result.changes === 0) return err(res, 'Application not found', 404);
 
-    logActivity({
+    await logActivity({
       entity_type: 'app',
       entity_id: id,
       entity_name: current.system_name,
